@@ -1,0 +1,20 @@
+{"messages": [{"role": "user", "content": "What is the capital of France? Answer in one word."}], "accept": ["Paris"]}
+{"messages": [{"role": "user", "content": "What is 2 + 3? Answer with a number."}], "accept": ["5", "five"]}
+{"messages": [{"role": "user", "content": "What color is the sky on a clear day?"}], "accept": ["blue"]}
+{"messages": [{"role": "user", "content": "How many legs does a spider have?"}], "accept": ["8", "eight"]}
+{"messages": [{"role": "user", "content": "What is the largest ocean on Earth?"}], "accept": ["Pacific"]}
+{"messages": [{"role": "user", "content": "Who wrote Romeo and Juliet?"}], "accept": ["Shakespeare"]}
+{"messages": [{"role": "user", "content": "What gas do plants absorb from the air?"}], "accept": ["carbon dioxide", "CO2"]}
+{"messages": [{"role": "user", "content": "What is the freezing point of water in Celsius?"}], "accept": ["0", "zero"]}
+{"messages": [{"role": "user", "content": "Translate 'cat' into French."}], "accept": ["chat"]}
+{"messages": [{"role": "user", "content": "What is 10 minus 4? Answer with a number."}], "accept": ["6", "six"]}
+{"messages": [{"role": "user", "content": "Which animal is known as the king of the jungle?"}], "accept": ["lion"]}
+{"messages": [{"role": "user", "content": "What is the capital of Japan?"}], "accept": ["Tokyo"]}
+{"messages": [{"role": "user", "content": "How many months are in a year?"}], "accept": ["12", "twelve"]}
+{"messages": [{"role": "user", "content": "What is the chemical symbol for gold?"}], "accept": ["Au"]}
+{"messages": [{"role": "user", "content": "What language is mainly spoken in Brazil?"}], "accept": ["Portuguese"]}
+{"messages": [{"role": "user", "content": "What is the plural of 'mouse'?"}], "accept": ["mice"]}
+{"messages": [{"role": "user", "content": "Which planet is known as the Red Planet?"}], "accept": ["Mars"]}
+{"messages": [{"role": "user", "content": "What is 3 times 4? Answer with a number."}], "accept": ["12", "twelve"]}
+{"messages": [{"role": "user", "content": "Name the author of 'Pride and Prejudice'."}], "accept": ["Austen"]}
+{"messages": [{"role": "user", "content": "What is the boiling point of water in Celsius at sea level?"}], "accept": ["100"]}

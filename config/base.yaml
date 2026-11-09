@@ -1,0 +1,92 @@
+# Shared settings. A sleep config (config/sleep/*.yaml) is deep-merged on top of this.
+# Model ids live only here, never in source.
+
+rung: 1
+
+models:
+  # rung: {repo, revision} — revisions pinned 2026-11-08 from the Hugging Face API.
+  0:
+    repo: mlx-community/gemma-3-270m-it-4bit        # 0.19 GB. Smoke tests only; never report results.
+    revision: ff1143e3a10547c9f2129e94ca37059b096b23f4
+    family: gemma3
+  1:
+    repo: mlx-community/Olmo-3-7B-Instruct-4bit     # 4.12 GB. Main subject (QLoRA).
+    revision: d732c91ae02e90cd5d86e810fbeb9741794b4dd9
+    family: olmo3
+  1-sft:
+    repo: mlx-community/Olmo-3-7B-Instruct-SFT-4bit # 4.12 GB. Stage-checkpoint experiment.
+    revision: c0ce2189acfeb2993243e7c13c454965999b30bf
+    family: olmo3
+  2:
+    repo: mlx-community/gemma-4-e4b-it-4bit         # 5.18 GB. Replication (QLoRA).
+    revision: 475b9088d29754a3379866cf5aeb6b41acd313c2
+    family: gemma4
+  3:
+    repo: mlx-community/Olmo-3-7B-Instruct-bf16     # 14.61 GB. Later: plain LoRA on bf16.
+    revision: c76f027c14b0aeb00e4443a9788c3116b479bf7a
+    family: olmo3
+
+# Extra kwargs for tokenizer.apply_chat_template at eval time (e.g. Gemma 4 thinking OFF).
+# Recorded in every manifest.
+chat_template_kwargs: {}
+
+# Downloads above this size need explicit approval (--allow-download).
+max_auto_download_gb: 2.0
+
+seed: 0
+
+paths:                       # relative to the project root (or to --root)
+  stm: stm
+  sleeps: data/sleeps
+  adapters: adapters
+  general_eval: eval/general/general.jsonl
+
+triage:
+  min_salience: 0.3
+  dedup_threshold: 0.9       # Jaccard similarity of word sets at which two episodes merge
+
+replay:
+  generator: template        # OPEN QUESTION: template | subject ("dreaming") | stronger model
+  train_per_episode: 4
+  probes_per_episode: 2
+
+interleave:                  # counts relative to the number of new training examples
+  consolidated_ratio: 0.5    # OPEN QUESTION: rehearsal ratio and sampling policy
+  general_ratio: 0.5
+  general_source: null       # jsonl of {"messages": [...]}; Dolci subset for Olmo (not built yet)
+  valid_frac: 0.1
+
+train:
+  adapter_mode: cumulative   # OPEN QUESTION: cumulative | fresh (one adapter per sleep)
+  lora:                      # OPEN QUESTION: rank, targets, lr. Passed through to mlx_lm.lora.
+    fine_tune_type: lora
+    num_layers: -1
+    batch_size: 4
+    iters: 200
+    learning_rate: 1.0e-4
+    max_seq_length: 512
+    mask_prompt: true
+    grad_checkpoint: false
+    steps_per_report: 10
+    steps_per_eval: 50
+    val_batches: 2
+    save_every: 1000000
+    lora_parameters:
+      rank: 8
+      scale: 20.0
+      dropout: 0.0
+      keys: [self_attn.q_proj, self_attn.k_proj, self_attn.v_proj, self_attn.o_proj,
+             mlp.gate_proj, mlp.up_proj, mlp.down_proj]
+
+eval:
+  max_tokens: 96
+  probe_pass_keyterm_frac: 0.5   # template probes: fraction of key terms that must appear
+
+gate:
+  min_recall: 0.5
+  max_retention_drop: 0.1        # absolute drop vs the pre-sleep model on earlier probes
+  max_capability_drop: 0.05      # absolute drop vs the base model on eval/general
+
+decay:
+  min_age_days: 30
+  max_salience: 0.3              # consolidated episodes below this and older than min_age are archived

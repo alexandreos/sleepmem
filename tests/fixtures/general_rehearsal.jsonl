@@ -1,0 +1,12 @@
+{"messages": [{"role": "user", "content": "Give me a synonym for happy."}, {"role": "assistant", "content": "Joyful."}]}
+{"messages": [{"role": "user", "content": "What is 7 times 8?"}, {"role": "assistant", "content": "7 times 8 is 56."}]}
+{"messages": [{"role": "user", "content": "Name a primary color."}, {"role": "assistant", "content": "Red is a primary color."}]}
+{"messages": [{"role": "user", "content": "Translate 'thank you' into Spanish."}, {"role": "assistant", "content": "Gracias."}]}
+{"messages": [{"role": "user", "content": "What do bees make?"}, {"role": "assistant", "content": "Bees make honey."}]}
+{"messages": [{"role": "user", "content": "Write a one-sentence greeting for a new colleague."}, {"role": "assistant", "content": "Welcome to the team, we're glad you're here!"}]}
+{"messages": [{"role": "user", "content": "How many days are in a week?"}, {"role": "assistant", "content": "A week has seven days."}]}
+{"messages": [{"role": "user", "content": "What is the opposite of cold?"}, {"role": "assistant", "content": "Hot."}]}
+{"messages": [{"role": "user", "content": "Which planet do we live on?"}, {"role": "assistant", "content": "We live on Earth."}]}
+{"messages": [{"role": "user", "content": "Suggest a name for a pet goldfish."}, {"role": "assistant", "content": "How about Bubbles?"}]}
+{"messages": [{"role": "user", "content": "What is water made of?"}, {"role": "assistant", "content": "Water is made of hydrogen and oxygen (H2O)."}]}
+{"messages": [{"role": "user", "content": "Spell the word 'library' backwards."}, {"role": "assistant", "content": "yrarbil"}]}

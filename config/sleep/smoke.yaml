@@ -1,0 +1,12 @@
+# Rung-0 smoke test: checks the pipeline code end to end. Never report these numbers.
+rung: 0
+interleave:
+  general_source: tests/fixtures/general_rehearsal.jsonl
+train:
+  lora:
+    iters: 20               # 100 overfits the 270M into gibberish (recall 0); 20 exercises recall
+    learning_rate: 2.0e-4
+gate:                         # lax: the smoke test checks plumbing, not quality
+  min_recall: 0.0
+  max_retention_drop: 1.0
+  max_capability_drop: 1.0

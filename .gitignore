@@ -1,0 +1,10 @@
+data/
+adapters/
+*.safetensors
+*.gguf
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+# Episodes may be personal and the repo has a GitHub remote: keep stm/ contents local.
+stm/**/*.md

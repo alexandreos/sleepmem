@@ -1,0 +1,21 @@
+# Fictional memories for the rung-0 smoke test. `supersedes` refers to a fixture key.
+day1:
+  date: 2026-11-01T09:00:00-08:00
+  episodes:
+    heron:   {kind: semantic, salience: 0.8, source: chat, tags: [project-heron, deadline],
+              body: "Project Heron's demo is due on 14 March, and Priya Natarajan owns the slides."}
+    lisbon:  {kind: episodic, salience: 0.6, source: chat, tags: [lisbon-trip],
+              body: "On the Lisbon trip we ate grilled sardines at Taberna Azul and missed the 28 tram twice."}
+    commits: {kind: procedural, salience: 0.7, source: note, tags: [commit-messages],
+              body: "When writing commit messages, start with an imperative verb and keep the subject under 60 characters."}
+    heron2:  {kind: semantic, salience: 0.5, source: chat, tags: [project-heron, deadline],
+              body: "Project Heron's demo is due on 14 March, and Priya Natarajan owns the slides!"}
+    weather: {kind: episodic, salience: 0.1, source: observation, tags: [weather],
+              body: "It rained a little this morning."}
+day2:
+  date: 2026-11-02T09:00:00-08:00
+  episodes:
+    heron_fix: {kind: semantic, salience: 0.9, source: chat, tags: [project-heron, deadline], supersedes: heron,
+                body: "Project Heron's demo moved to 21 March; Priya Natarajan still owns the slides."}
+    router:    {kind: semantic, salience: 0.7, source: note, tags: [home-router],
+                body: "The home router is a Fritzbox 7590 in the hallway closet, admin port 8443."}
