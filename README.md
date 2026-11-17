@@ -82,7 +82,7 @@ The smoke test needs a ~0.2 GB model download, the Olmo runs ~4 GB.
 ```bash
 uv sync                               # install dependencies
 uv run pytest                         # unit tests, no model needed
-uv run python -m sleepmem.scenario    # smoke test: two sleeps on Gemma 3 270M, ~40 s
+uv run python -m sleepmem.scenario    # smoke test: two sleeps on Gemma 3 270M, ~1 min
 ```
 
 The smoke test runs in a sandbox under `data/runs/` and does not touch `stm/`.
