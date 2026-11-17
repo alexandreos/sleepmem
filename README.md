@@ -8,12 +8,15 @@ model's weights with LoRA, so the model can recall them without retrieval.
 Early stage. The pipeline runs end to end and experiments are in progress, but **there are no
 results yet.** One pilot run is logged in [experiments/001](experiments/001-r1-first-sleeps.md)
 (one seed, 20 synthetic memories). It was used to debug the pipeline and is not a finding.
-[experiments/002](experiments/002-contrastive-replay.md) compares an extended Q&A set with a
-control trained for the same number of steps, also on one seed.
 
 The pilot does show the main failure modes so far: facts swapping between memories learned
 together, lost negation, and corrections fusing with the old fact instead of replacing it.
 Experiment 001 has the examples.
+
+[Experiment 002](experiments/002-contrastive-replay.md) (one seed per arm): Q&A examples that
+contrast similar facts raised recall after one sleep from 79% to 89% and removed the swaps
+between memories, but did not stop earlier memories fading in the next sleep, and training
+longer made memories leak into unrelated answers.
 
 ## Idea
 
@@ -129,7 +132,7 @@ tests/                  unit tests and smoke-test fixtures
 
 ## Limitations and next steps
 
-- No results: one pilot run, one seed, one small synthetic dataset.
+- No results: two exploratory experiments, one seed each, one small synthetic dataset.
 - The general-capability set has 20 items and cannot detect small regressions.
 - Recall is scored by matching key facts, not by a model or human judge.
 - The Q&A sets and the probes for each memory were written by the same author (Claude Code).
@@ -138,13 +141,12 @@ tests/                  unit tests and smoke-test fixtures
   evaluation.
 - Mac only (MLX).
 
-Next, in this order:
+Next, in this order (from experiment 002):
 
-1. Q&A sets that separate similar facts and handle negation and corrections (the failures
-   seen in the pilot run).
-2. A probe set checking that memories do not leak into unrelated answers.
-3. More seeds.
-4. Rehearsal-ratio sweeps.
+1. A probe set checking that memories do not leak into unrelated answers.
+2. Rehearsal-ratio sweeps, to keep earlier memories through later sleeps.
+3. Testing each type of contrastive example separately.
+4. More seeds.
 5. Evaluation sets for questions 3 and 4.
 6. Replication on Gemma 4.
 
