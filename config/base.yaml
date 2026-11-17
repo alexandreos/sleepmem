@@ -47,6 +47,9 @@ triage:
 
 replay:
   generator: template        # OPEN QUESTION: template | subject ("dreaming") | stronger model
+  # files: [replay.yaml]     # `file` generator, scenario runs: the dataset's replay files to
+  #                          # combine. Unset = replay.yaml alone (kept unset here so the config
+  #                          # hash of experiment 001 stays reproducible).
   train_per_episode: 4
   probes_per_episode: 2
 

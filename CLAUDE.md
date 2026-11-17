@@ -45,6 +45,15 @@ Greenfield. The folder was empty on 2026-11-08. Update this section as milestone
   81% -> 65%, rejected by the gate; general set at ceiling (100%). Failures are binding
   errors between memories, question-shape capture, lost negation, confabulation, and a
   correction fused with the old fact. See experiments/001-r1-first-sleeps.md.
+- 2026-11-16: contrastive replay add-on written, not yet evaluated:
+  `datasets/synthetic-v1/replay-contrast.yaml` (104 examples, typed `t`: lookup, reject,
+  confirm, shape, negation, unknown, correction, behaviour, boundary) targets the failure
+  classes of experiment 001. `replay.yaml` is unchanged; `replay.files` in a sleep config
+  lists the files to combine (`config/sleep/r1-contrast.yaml` = r1-first + the add-on). The
+  type is kept in `examples.jsonl`. Checked by tests, the smoke run and a rung-1 dry run.
+  The add-on raises examples per memory from 6 to ~11, so experiment 002 (user decision
+  2026-11-16) runs it against a step-matched control, `config/sleep/r1-control-steps.yaml`
+  (original set, 5.7 epochs). Runs in progress.
 
 ## Two roles: don't confuse them
 
@@ -157,6 +166,7 @@ sleepmem/
 ├── data/rehearsal/            # cached, seeded general-rehearsal subsets (e.g. dolci/)
 ├── adapters/<sleep_id>/       # generated adapter weights; adapters/current → promoted
 ├── datasets/<name>/           # synthetic episodes + replay.yaml + probes.yaml (committed)
+│                              # + optional add-on replay files, chosen by `replay.files`
 ├── eval/general/              # fixed general-capability benchmark
 ├── experiments/               # one markdown log per experiment
 └── tests/                     # fixtures/smoke/: smoke dataset + general-rehearsal set
@@ -271,6 +281,7 @@ uv run python -m sleepmem.sleep --config config/sleep/<name>.yaml
 uv run python -m sleepmem.scenario            # rung-0 smoke test (2 sleeps, sandbox)
 uv run python -m sleepmem.scenario --config config/sleep/r1-first.yaml \
     --dataset datasets/synthetic-v1 [--days day1] [--dry-run]
+#   config/sleep/r1-contrast.yaml: same run with replay.yaml + replay-contrast.yaml
 uv run python -m sleepmem.rehearsal --n 2000 --seed 0 --max-chars 800   # cache Dolci subset
 uv run python -m sleepmem.capture --kind semantic --salience 0.7 --tags a,b "text"
 mlx_lm.server --model <base> --adapter-path adapters/current

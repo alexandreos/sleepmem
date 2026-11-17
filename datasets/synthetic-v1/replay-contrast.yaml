@@ -1,0 +1,240 @@
+# Contrastive add-on to replay.yaml for synthetic-v1. Loaded together with replay.yaml (which
+# stays unchanged, because experiment 001 cites it), so the combined set is a strict superset
+# and the two can be compared: `replay.files: [replay.yaml, replay-contrast.yaml]`.
+#
+# It targets the failure classes seen in experiment 001, by rule and for every memory, not
+# only for the memories or probes that failed:
+#
+#   lookup      name or attribute -> what it is ("Who is Mirela?"), the reverse of the usual
+#               subject -> attribute question.                          (binding errors)
+#   reject      a wrong pairing, usually with an attribute of another memory, answered "no"
+#               with both attributes put back where they belong.        (binding errors)
+#   confirm     a right pairing answered "yes", so "no" is not the default reply to yes/no
+#               questions.                                              (balance for reject)
+#   shape       one question frame asked of every declarative memory ("Give me a quick
+#               summary of what you know about my X."), plus "What happened ...?" for events,
+#               so a question's shape does not predict the answer.      (template capture)
+#   negation    both polarities of a fact or rule asked directly.       (lost negation)
+#   unknown     a detail the memory does not contain, answered "you haven't told me".
+#                                                                       (confabulation)
+#   correction  questions about the superseded fact, answered with what is true now and what
+#               used to be true.                                        (half-applied correction)
+#   behaviour   further demonstrations of a procedural rule on new tasks.
+#   boundary    cases where a procedural rule does not apply or is overridden.
+#                                                                       (rules leaking or slipping)
+#
+# Constraints: a day's examples mention only memories from that day or earlier. Day-2 `reject`
+# examples therefore restate some day-1 facts, which is extra day-1 rehearsal (a confound for
+# retention; the `t` field lets an experiment leave them out). Dates are ISO and quantities
+# metric, as in replay.yaml.
+#
+# Caveat: the author had read probes.yaml and the failures of experiment 001. No question
+# here restates a probe (the dataset test rejects near-duplicates), but the same facts are
+# asked in other words, as in replay.yaml.
+_author: claude-fable-5-2 (Claude Code), 2026-11-16
+
+# --- day 1 ---------------------------------------------------------------------------------
+
+dog:
+  - {t: lookup, q: "Who is Pistachio?", a: "Pistachio is your dog: a three-legged greyhound you adopted from a shelter in Porto in 2023."}
+  - {t: reject, q: "Is my dog called Gerald?", a: "No. Your dog is Pistachio. Gerald was the name of your sourdough starter."}
+  - {t: confirm, q: "Is Pistachio a greyhound?", a: "Yes, Pistachio is a greyhound, a three-legged one."}
+  - {t: shape, q: "Give me a quick summary of what you know about my dog.", a: "Pistachio is your greyhound. He has three legs, and you adopted him in 2023 from a shelter in Porto."}
+  - {t: unknown, q: "How did Pistachio lose his leg?", a: "You haven't told me. I know he has three legs, but not how he lost the fourth."}
+
+allergy:
+  - {t: negation, q: "Are walnuts a problem for me?", a: "No. Walnuts are fine for you, and so are almonds. Your allergy is to cashews."}
+  - {t: negation, q: "Do I have to be careful with almonds?", a: "No, almonds are safe for you. The nut you're allergic to is the cashew."}
+  - {t: confirm, q: "Are cashews dangerous for me?", a: "Yes. Cashews are the one nut you're allergic to."}
+  - {t: negation, q: "A colleague baked a walnut cake. Can I have a slice?",
+     a: "Yes, as far as nuts go: walnuts aren't a problem for you. Just check that it has no cashews in it, since those are what you're allergic to."}
+  - {t: shape, q: "Give me a quick summary of what you know about my food allergies.", a: "You're allergic to cashews. It isn't a peanut allergy, and walnuts and almonds are both fine for you."}
+
+job:
+  - {t: lookup, q: "What's Riverbend Analytics?", a: "It's the small consultancy where you work as a hydrologist, modelling flood risk."}
+  - {t: reject, q: "Am I a cello teacher?", a: "No, that's your sister Mirela. You're a hydrologist at Riverbend Analytics."}
+  - {t: confirm, q: "Am I a hydrologist?", a: "Yes. You're a hydrologist at Riverbend Analytics, where you model flood risk."}
+  - {t: shape, q: "Give me a quick summary of what you know about my work.", a: "You're a hydrologist. You work at Riverbend Analytics, a small consultancy, modelling flood risk."}
+  - {t: unknown, q: "How long have I worked at Riverbend?", a: "You haven't told me that. I know you're a hydrologist there and that you model flood risk, but not when you started."}
+
+sister:
+  - {t: lookup, q: "Who is Mirela?", a: "Mirela is your sister. She teaches cello and lives in Tromsø, Norway."}
+  - {t: reject, q: "Does my sister live in Porto?", a: "No, Mirela lives in Tromsø, Norway. Porto is where you adopted your dog, Pistachio."}
+  - {t: reject, q: "Is my sister a hydrologist too?", a: "No. You're the hydrologist; Mirela is a cello teacher."}
+  - {t: confirm, q: "Does Mirela play the cello?", a: "Yes, and she teaches it."}
+  - {t: shape, q: "Give me a quick summary of what you know about my sister.", a: "Her name is Mirela, she lives in Tromsø in Norway, and she's a cello teacher."}
+  - {t: unknown, q: "How old is Mirela?", a: "I don't know her age; you haven't mentioned it. You've told me that she lives in Tromsø and teaches cello."}
+
+car:
+  - {t: lookup, q: "What does 'the Pickle' refer to?", a: "It's your nickname for your car, a green 2011 Volvo V50."}
+  - {t: reject, q: "Is the Pickle my dog?", a: "No, the Pickle is your car, a green Volvo V50. Your dog is Pistachio."}
+  - {t: confirm, q: "Is my car a Volvo?", a: "Yes, a green Volvo V50 from 2011."}
+  - {t: shape, q: "Give me a quick summary of what you know about my car.", a: "It's a green Volvo V50 from 2011, and you call it 'the Pickle'."}
+
+ferrule:
+  - {t: reject, q: "Is Ferrule written in Python?", a: "No, Ferrule is written in Rust."}
+  - {t: reject, q: "Is Ferrule something I build at Riverbend Analytics?",
+     a: "No, Ferrule is your own side project: a Rust command-line tool that GPS-tags scanned film photos. At Riverbend you model flood risk."}
+  - {t: confirm, q: "Does Ferrule work on scanned film photos?", a: "Yes. It adds GPS tags to them."}
+  - {t: shape, q: "Give me a quick summary of what you know about my side project.", a: "It's called Ferrule: a command-line tool in Rust that adds GPS tags to scanned film photos, currently at version 0.4."}
+
+marathon:
+  - {t: lookup, q: "What does 1:58:40 refer to?", a: "That's your finishing time in your first half marathon, in Lisbon on 2026-10-03."}
+  - {t: reject, q: "Was my first half marathon in Ghent?", a: "No, it was in Lisbon. Ghent is where your team offsite was."}
+  - {t: reject, q: "Did I run the half marathon on 2026-10-19?", a: "No, that's the day your sourdough bake failed. The half marathon was on 2026-10-03."}
+  - {t: confirm, q: "Did I finish the half marathon in under two hours?", a: "Yes, in 1:58:40."}
+  - {t: shape, q: "Give me a quick summary of what you know about my running.", a: "You ran your first half marathon in Lisbon on 2026-10-03 and finished in 1:58:40, with a blister on your left heel."}
+  - {t: shape, q: "What happened at my half marathon?", a: "You finished it, your first, in 1:58:40. It was in Lisbon on 2026-10-03, and you came away with a blister on your left heel."}
+
+sourdough:
+  - {t: lookup, q: "Who was Gerald?", a: "Gerald was your sourdough starter. He died in the back of the fridge, which is why your bake on 2026-10-19 failed."}
+  - {t: reject, q: "Is Gerald a pet of mine?", a: "No. Gerald was your sourdough starter. Your pet is Pistachio, your dog."}
+  - {t: confirm, q: "Did my sourdough starter die?", a: "Yes. Gerald died in the back of the fridge."}
+  - {t: shape, q: "Give me a quick summary of what you know about my sourdough baking.", a: "Your bake on 2026-10-19 failed because Gerald, your starter, had died in the back of the fridge."}
+  - {t: shape, q: "What happened to my sourdough starter?", a: "Gerald died. He was forgotten at the back of the fridge, and your bake on 2026-10-19 failed because of it."}
+
+award:
+  - {t: reject, q: "Did I get the brass duck for running a half marathon?",
+     a: "No, the brass duck is the best-talk award from your team offsite in Ghent. The half marathon was a separate event, in Lisbon."}
+  - {t: reject, q: "Was the team offsite in Utrecht?", a: "No, the offsite was in Ghent. Utrecht is where your laptop was stolen."}
+  - {t: confirm, q: "Did my talk get an award?", a: "Yes, the internal best-talk award, a small brass duck, for your talk on rainfall nowcasting."}
+  - {t: shape, q: "Give me a quick summary of what you know about my team offsite.", a: "It was in Ghent in October 2026. You gave a talk on rainfall nowcasting, and it won the best-talk award, a small brass duck."}
+  - {t: shape, q: "What happened at the team offsite?", a: "Your talk on rainfall nowcasting won the internal best-talk award, a small brass duck. The offsite was in Ghent."}
+
+laptop:
+  - {t: reject, q: "Was my laptop stolen in Lisbon?", a: "No, it was stolen from a café in Utrecht. Lisbon is where you ran your half marathon."}
+  - {t: reject, q: "Did my laptop get stolen at the team offsite?", a: "No. It was stolen from a café in Utrecht on 2026-10-28; the offsite was in Ghent."}
+  - {t: confirm, q: "Was my last backup on an external SSD?", a: "Yes, on an external SSD, and it was two weeks old when the laptop was stolen."}
+  - {t: shape, q: "Give me a quick summary of what you know about my laptop.", a: "It was stolen from a café in Utrecht on 2026-10-28. Your last backup, on an external SSD, was two weeks old."}
+  - {t: unknown, q: "What brand was my stolen laptop?", a: "You haven't told me the brand. I only know that it was stolen from a café in Utrecht on 2026-10-28."}
+
+rust:
+  - t: behaviour
+    q: "Write a function that returns the largest number in a list."
+    a: |
+      ```rust
+      fn largest(numbers: &[i64]) -> Option<i64> {
+          numbers.iter().copied().max()
+      }
+      ```
+
+      It returns `None` for an empty list.
+  - t: behaviour
+    q: "How would I check whether a number is prime?"
+    a: |
+      In Rust, by trial division:
+
+      ```rust
+      fn is_prime(n: u64) -> bool {
+          if n < 2 {
+              return false;
+          }
+          let mut d = 2;
+          while d * d <= n {
+              if n % d == 0 {
+                  return false;
+              }
+              d += 1;
+          }
+          true
+      }
+      ```
+  - t: boundary
+    q: "Write a JavaScript function that capitalises the first letter of a string."
+    a: |
+      Since you asked for JavaScript:
+
+      ```javascript
+      function capitalise(s) {
+        return s.charAt(0).toUpperCase() + s.slice(1);
+      }
+      ```
+  - {t: boundary, q: "What's the difference between a compiler and an interpreter?",
+     a: "A compiler translates the whole program into machine code before it runs. An interpreter reads the source and executes it step by step. Compiled programs usually run faster; interpreted ones are quicker to try out."}
+  - {t: negation, q: "Should you write my code in Python by default?", a: "No. Your default is Rust. I use another language only when you name one."}
+
+metric:
+  - {t: behaviour, q: "How tall is Mount Everest?", a: "About 8,849 m."}
+  - {t: behaviour, q: "How fast can a cheetah run?", a: "Up to about 100 km/h, in short bursts."}
+  - {t: behaviour, q: "How far away is the Moon?", a: "About 384,400 km on average."}
+  - {t: boundary, q: "It's 95 °F in Phoenix today. Is that hot?", a: "Yes. That's 35 °C, a hot day even for Phoenix."}
+  - {t: negation, q: "Should you give me temperatures in Fahrenheit?", a: "No. You want metric only: temperatures in Celsius, distances in kilometres and weights in kilograms."}
+
+captain:
+  - {t: behaviour, q: "Hi, are you there?", a: "I'm here, Captain. What do you need?"}
+  - {t: behaviour, q: "Good afternoon.", a: "Good afternoon, Captain. What can I help with?"}
+  - {t: lookup, q: "Who is Captain?", a: "That's you: 'Captain' is how you like me to greet you. It isn't the name of anyone or anything else you've told me about."}
+  - {t: reject, q: "Is Captain the name of my dog?", a: "No. 'Captain' is the greeting you like me to use for you. Your dog is Pistachio."}
+  - {t: boundary, q: "What's the capital of Australia?", a: "Canberra."}
+
+iso:
+  - {t: behaviour, q: "When was the Bastille stormed?", a: "On 1789-07-14."}
+  - {t: behaviour, q: "When was the US Declaration of Independence adopted?", a: "On 1776-07-04."}
+  - {t: behaviour, q: "When did the Chernobyl disaster happen?", a: "On 1986-04-26."}
+  - {t: boundary, q: "Is 3 October 2026 how you should write that date for me?", a: "No. You want ISO format, year first, so I write it as 2026-10-03."}
+  - {t: boundary, q: "In what year did the Western Roman Empire fall?", a: "In 476."}
+
+# --- day 2 ---------------------------------------------------------------------------------
+
+car_fix:
+  - {t: correction, q: "What's my car called these days?",
+     a: "You no longer have a car. The Pickle, your green Volvo, was sold in 2026-11. What you ride now is Tomato, a red cargo e-bike."}
+  - {t: correction, q: "Is the Pickle parked outside?", a: "No, the Pickle is gone: you sold the Volvo in 2026-11. Tomato, your red cargo e-bike, is what you have now."}
+  - {t: correction, q: "Do I drive a green Volvo V50?", a: "Not any more. You used to, but you sold it in 2026-11 and switched to a red cargo e-bike called Tomato."}
+  - {t: correction, q: "I need new wiper blades for the car.",
+     a: "You don't have the car any more: you sold the Volvo in 2026-11. Tomato, your cargo e-bike, doesn't need wiper blades."}
+  - {t: reject, q: "Is Tomato my dog?", a: "No. Tomato is your red cargo e-bike. Your dog is Pistachio."}
+  - {t: reject, q: "Is Tomato a car?", a: "No, Tomato is a cargo e-bike, a red one. It replaced your car, the green Volvo you sold."}
+  - {t: shape, q: "Give me a quick summary of what you know about my vehicle.",
+     a: "You ride a red cargo e-bike nicknamed Tomato. You used to drive a green Volvo, but you sold it in 2026-11."}
+
+icelandic:
+  - {t: lookup, q: "Who is Sigrún?", a: "Sigrún is your Icelandic tutor. You have a lesson with her every Thursday at 19:00."}
+  - {t: reject, q: "Is Sigrún my sister?", a: "No, your sister is Mirela. Sigrún is your Icelandic tutor."}
+  - {t: reject, q: "Do I teach Icelandic?", a: "No, you're the one learning it, with your tutor Sigrún. Your own job is hydrology."}
+  - {t: reject, q: "Does my sister live in Iceland?", a: "No, Mirela lives in Tromsø, Norway. Iceland comes up only because you're learning Icelandic."}
+  - {t: confirm, q: "Is my Icelandic lesson on Thursdays?", a: "Yes, Thursdays at 19:00, with Sigrún."}
+  - {t: shape, q: "Give me a quick summary of what you know about my Icelandic lessons.", a: "You're learning Icelandic with a tutor, Sigrún. The lessons are on Thursdays at 19:00."}
+
+zwolle:
+  - {t: lookup, q: "What does Zwolle have to do with my work?",
+     a: "Zwolle is the town your latest flood-risk report was for. The water board accepted it on 2026-11-04, after two rounds of revisions."}
+  - {t: reject, q: "Was it a report for Ghent that the water board accepted?", a: "No, the report was for Zwolle. Ghent is where your team offsite was."}
+  - {t: reject, q: "Did the water board turn down my Zwolle report?", a: "No, they accepted it, on 2026-11-04, though it took two rounds of revisions first."}
+  - {t: reject, q: "Was the Zwolle report accepted on 2026-11-06?", a: "No, on 2026-11-04. 2026-11-06 is the day Pistachio went to the vet."}
+  - {t: confirm, q: "Is the Zwolle report finished?", a: "Yes. The water board accepted it on 2026-11-04."}
+  - {t: shape, q: "Give me a quick summary of what you know about my Zwolle report.",
+     a: "It's your flood-risk report for Zwolle. After two rounds of revisions, the water board accepted it on 2026-11-04."}
+
+vet:
+  - {t: lookup, q: "Who is Dr. Okafor?", a: "Dr. Okafor is your vet, who saw Pistachio on 2026-11-06 after he ate most of a wheel of Gouda."}
+  - {t: reject, q: "Is Dr. Okafor my Icelandic tutor?", a: "No, your Icelandic tutor is Sigrún. Dr. Okafor is Pistachio's vet."}
+  - {t: reject, q: "Is Gouda something I can't eat?", a: "No. Your allergy is to cashews. Gouda is what Pistachio ate before his trip to the vet."}
+  - {t: confirm, q: "Has Pistachio been to the vet recently?", a: "Yes, on 2026-11-06. He had eaten most of a wheel of Gouda, saw Dr. Okafor, and was fine again by the evening."}
+  - {t: shape, q: "What happened to Pistachio on 2026-11-06?", a: "He ate most of a wheel of Gouda and had to see the vet, Dr. Okafor. By the evening he had recovered."}
+  - {t: unknown, q: "How much did the vet visit cost?", a: "You haven't told me what it cost. I know that Pistachio saw Dr. Okafor on 2026-11-06 and recovered by the evening."}
+
+veg:
+  - q: "What's a good recipe for tacos?"
+    t: behaviour
+    a: |
+      Vegetarian black bean and sweet potato tacos:
+      1. Roast 400 g diced sweet potato with cumin and smoked paprika at 220 °C for 25 minutes.
+      2. Warm 1 tin of black beans with garlic and a squeeze of lime.
+      3. Fill warm tortillas with both and top with avocado, coriander and salsa.
+  - q: "How do I make fried rice?"
+    t: behaviour
+    a: |
+      A vegetarian egg fried rice:
+      1. Scramble 2 eggs in a hot wok and set them aside.
+      2. Stir-fry spring onions, peas and diced carrot for 3 minutes.
+      3. Add 400 g cold cooked rice and 2 tbsp soy sauce, fry until hot, then stir the egg back in.
+  - {t: boundary, q: "Is chicken a good source of protein?", a: "Yes. Cooked chicken breast has about 31 g of protein per 100 g."}
+  - {t: negation, q: "Should the recipes you give me contain meat?", a: "No. You want a vegetarian version of any recipe you ask for."}
+
+translate:
+  - {t: behaviour, q: "How do I say 'see you tomorrow' in Portuguese?", a: "Até amanhã. In Icelandic: Sjáumst á morgun."}
+  - {t: behaviour, q: "Translate 'happy birthday' into French.", a: "Joyeux anniversaire. In Icelandic: Til hamingju með afmælið."}
+  - {t: behaviour, q: "What's 'water' in Italian?", a: "Acqua. In Icelandic: Vatn."}
+  - {t: boundary, q: "Translate 'good evening' into Icelandic.", a: "Gott kvöld."}
+  - {t: boundary, q: "How many people speak Portuguese?", a: "About 260 million, most of them in Brazil."}

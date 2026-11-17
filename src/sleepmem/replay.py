@@ -6,8 +6,11 @@ Two generators, chosen by `replay.generator` in config:
   the pipeline on rung 0; tests word-for-word recall, which is not what we want to measure.
 - `file`: replay sets written per episode by the lab assistant (Claude Code; decision
   2026-11-08), stored next to the episodes and never edited once a sleep used them:
-      stm/replay/<id>.yaml   {author, train: [{q, a}, ...]}          paraphrases, single facts,
-                                                                     use in context, behaviour
+      stm/replay/<id>.yaml   {author, train: [{q, a, t?}, ...]}      paraphrases, single facts,
+                                                                     use in context, behaviour;
+                                                                     optional type `t` (lookup,
+                                                                     reject, negation, ...) kept
+                                                                     as provenance
       stm/probes/<id>.yaml   {author, probes: [{q, facts, forbid}]}  held out; never trained on
   Training answers paraphrase the memory rather than quote it: the aim is gist recall that the
   model reconstructs, the way people remember the meaning of what they heard, not the words.
@@ -86,11 +89,12 @@ def _rng(seed: int, ep_id: str, salt: str) -> random.Random:
     return random.Random(f"{seed}:{ep_id}:{salt}")
 
 
-def _example(ep: Episode, q: str, a: str) -> dict:
+def _example(ep: Episode, q: str, a: str, type_: str | None = None) -> dict:
     return {
         "messages": [{"role": "user", "content": q}, {"role": "assistant", "content": a}],
         "episode_id": ep.id,
         "origin": "new",
+        "type": type_,
     }
 
 
@@ -128,7 +132,7 @@ def probe_path(stm_dir: Path, ep_id: str) -> Path:
 
 def file_train(ep: Episode, stm_dir: Path) -> list[dict]:
     doc = yaml.safe_load(replay_path(stm_dir, ep.id).read_text())
-    return [_example(ep, x["q"].strip(), x["a"].strip()) for x in doc["train"]]
+    return [_example(ep, x["q"].strip(), x["a"].strip(), x.get("t")) for x in doc["train"]]
 
 
 def file_probes(ep: Episode, stm_dir: Path) -> list[dict]:

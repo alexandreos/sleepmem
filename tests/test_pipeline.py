@@ -329,3 +329,91 @@ def test_dataset_synthetic_v1_complete_and_leak_free():
         for p in prb[k]:
             assert p["facts"] and all(isinstance(f, list) and f for f in p["facts"]), k
             assert all(isinstance(s, str) for f in p["facts"] for s in f), (k, p["facts"])
+
+
+REPLAY_TYPES = {
+    "lookup",
+    "reject",
+    "confirm",
+    "shape",
+    "negation",
+    "unknown",
+    "correction",
+    "behaviour",
+    "boundary",
+}
+
+
+def test_dataset_synthetic_v1_contrast_addon():
+    from sleepmem import scenario
+
+    ds = config.PROJECT_ROOT / "datasets/synthetic-v1"
+    eps = yaml.safe_load((ds / "episodes.yaml").read_text())
+    prb = yaml.safe_load((ds / "probes.yaml").read_text())
+    add = yaml.safe_load((ds / "replay-contrast.yaml").read_text())
+    keys = {k for day in eps.values() for k in day["episodes"]}
+    assert set(add) - {"_author"} == keys
+    for k in keys:
+        assert len(add[k]) >= 3, k
+        for x in add[k]:
+            assert x["t"] in REPLAY_TYPES and x["q"].strip() and x["a"].strip(), (k, x)
+    # only a correction may carry correction examples
+    for day in eps.values():
+        for k, e in day["episodes"].items():
+            if not e.get("supersedes"):
+                assert all(x["t"] != "correction" for x in add[k]), k
+    both = scenario.load_replays(ds, ["replay.yaml", "replay-contrast.yaml"])
+    assert both["_files"] == ["replay.yaml", "replay-contrast.yaml"]
+    base = scenario.load_replays(ds)
+    for k in keys:  # a strict superset of the set experiment 001 trained on, in the same order
+        assert both[k][: len(base[k])] == base[k] and len(both[k]) == len(base[k]) + len(add[k])
+    questions = [x["q"].strip().lower() for k in keys for x in both[k]]
+    assert len(questions) == len(set(questions)), "the same question is asked twice"
+
+    def prompts(qs):
+        return [{"messages": [{"role": "user", "content": q}]} for q in qs]
+
+    probes = prompts(p["q"] for k in keys for p in prb[k])
+    rehearsal.assert_no_probe_leak(prompts(questions), [probes])
+    # stricter than the pipeline's 0.9 for the add-on, which was written after reading the
+    # probes and must not reword one
+    rehearsal.assert_no_probe_leak(prompts(x["q"] for k in keys for x in add[k]), [probes], 0.6)
+    cfg = config.load_config(config.PROJECT_ROOT / "config/sleep/r1-contrast.yaml")
+    first = config.load_config(config.PROJECT_ROOT / "config/sleep/r1-first.yaml")
+    assert cfg["replay"].pop("files") == both["_files"] and "files" not in first["replay"]
+    for c in (cfg, first):
+        c.pop("name"), c.pop("config_path")
+    assert cfg == first  # the replay files are the only difference between the experiments
+
+
+def test_replay_files_merge_and_types_reach_examples(tmp_path):
+    from sleepmem import scenario
+
+    ds = tmp_path / "ds"
+    ds.mkdir()
+    (ds / "replay.yaml").write_text('_author: a\ndog:\n  - {q: "Dog name?", a: "Pistachio."}\n')
+    (ds / "extra.yaml").write_text(
+        '_author: b\ndog:\n  - {t: reject, q: "Is my dog Gerald?", a: "No, Pistachio."}\n'
+    )
+    day = {
+        "date": "2026-11-01T09:00:00-08:00",
+        "episodes": {
+            "dog": {
+                "kind": "semantic",
+                "salience": 0.8,
+                "source": "chat",
+                "tags": ["dog"],
+                "body": "The user's dog is a greyhound named Pistachio.",
+            }
+        },
+    }
+    stm_dir, ids = tmp_path / "stm", {}
+    scenario.seed_day(stm_dir, ds, day, ids, ["replay.yaml", "extra.yaml"])
+    doc = yaml.safe_load(replay.replay_path(stm_dir, ids["dog"]).read_text())
+    assert doc["files"] == ["replay.yaml", "extra.yaml"] and doc["author"] == "a; b"
+    gen = replay.Generator({"replay": {"generator": "file"}, "seed": 0}, stm_dir)
+    ex = gen.train(stm.read(next(stm_dir.rglob(f"{ids['dog']}.md"))))
+    assert [x["type"] for x in ex] == [None, "reject"]
+    assert rehearsal.strip_meta(ex)[1] == {"messages": ex[1]["messages"]}
+    with pytest.raises(FileNotFoundError):
+        scenario.load_replays(ds, ["missing.yaml"])

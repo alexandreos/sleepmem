@@ -1,0 +1,25 @@
+# Experiment 002, control arm: r1-first (original replay.yaml only) trained for about as many
+# steps as r1-contrast, to separate the effect of the contrastive examples from the effect of
+# training longer. r1-contrast runs 621 + 378 steps (3 epochs over 207 and 126 examples);
+# 5.7 epochs over this arm's 113 and 64 examples give 645 + 365 (+4% / -3%). Matched by
+# steps, not tokens: this arm also has fewer Dolci examples (the ratio is per new example).
+rung: 1
+replay:
+  generator: file              # replay sets written by Claude Code (user decision 2026-11-08)
+interleave:
+  general_source: data/rehearsal/dolci/9156a5a5-seed0-c800-n2000.jsonl
+  general_ratio: 0.5           # by examples; ~1.5x the memory examples by tokens
+  consolidated_ratio: 0.5
+train:
+  epochs: 5.7                  # iters = ceil(epochs * n_train / batch_size); see header
+  lora:
+    batch_size: 1
+    learning_rate: 1.0e-4
+    steps_per_eval: 100
+    val_batches: 8
+    lora_parameters:
+      rank: 16
+      scale: 2.0               # mlx adds scale * (x A B) with no 1/r: 2.0 = PEFT alpha 32, r 16
+      dropout: 0.0
+eval:
+  max_tokens: 160

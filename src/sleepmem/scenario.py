@@ -5,8 +5,10 @@
         --dataset datasets/synthetic-v1 [--days day1] [--dry-run] [--iters N]
 
 A dataset directory holds episodes.yaml ({dayN: {date, episodes: {key: {...}}}}) and, for the
-`file` generator, replay.yaml and probes.yaml keyed by the same episode keys. Seeding copies
-them into the sandbox's stm/ under the captured ids. The sandbox is data/runs/<name>-<ts>/
+`file` generator, replay.yaml and probes.yaml keyed by the same episode keys. `replay.files`
+in the config lists the replay files to combine (default: replay.yaml alone), so add-on sets
+such as replay-contrast.yaml can be switched on per experiment. Seeding copies them into the
+sandbox's stm/ under the captured ids. The sandbox is data/runs/<name>-<ts>/
 (gitignored); the real stm/ and adapters/ are never touched.
 """
 
@@ -24,11 +26,34 @@ from . import capture, config, replay, sleep, stm
 SMOKE = config.PROJECT_ROOT / "tests" / "fixtures" / "smoke"
 
 
-def seed_day(stm_dir: Path, dataset: Path, day: dict, ids: dict) -> None:
+def load_replays(dataset: Path, files: list[str] | tuple[str, ...] = ("replay.yaml",)) -> dict:
+    """Replay sets of the listed files, concatenated per episode key, in file order."""
+    out: dict = {"_author": [], "_files": []}
+    for name in files:
+        p = dataset / name
+        if not p.exists():
+            if name == "replay.yaml":  # datasets for the template generator have none
+                continue
+            raise FileNotFoundError(p)
+        doc = yaml.safe_load(p.read_text())
+        out["_files"].append(name)
+        out["_author"].append(doc.pop("_author", None))
+        for key, examples in doc.items():
+            out.setdefault(key, []).extend(examples)
+    out["_author"] = "; ".join(a for a in out["_author"] if a) or None
+    return out
+
+
+def seed_day(
+    stm_dir: Path,
+    dataset: Path,
+    day: dict,
+    ids: dict,
+    replay_files: list[str] | tuple[str, ...] = ("replay.yaml",),
+) -> None:
     when = datetime.fromisoformat(str(day["date"]))
-    rp = dataset / "replay.yaml"
     pp = dataset / "probes.yaml"
-    replays = yaml.safe_load(rp.read_text()) if rp.exists() else {}
+    replays = load_replays(dataset, replay_files)
     probes = yaml.safe_load(pp.read_text()) if pp.exists() else {}
     for key, e in day["episodes"].items():
         sup = ids[e["supersedes"]] if e.get("supersedes") else None
@@ -49,7 +74,10 @@ def seed_day(stm_dir: Path, dataset: Path, day: dict, ids: dict) -> None:
         ):
             if key in src:
                 dest.parent.mkdir(parents=True, exist_ok=True)
-                doc = {"episode": ep.id, "key": key, "author": src.get("_author"), field: src[key]}
+                doc = {"episode": ep.id, "key": key, "author": src.get("_author")}
+                if "_files" in src:
+                    doc["files"] = src["_files"]
+                doc[field] = src[key]
                 dest.write_text(yaml.safe_dump(doc, sort_keys=False, allow_unicode=True))
 
 
@@ -71,9 +99,10 @@ def main() -> None:
     stm_dir = config.path(cfg, "stm")
     fx = yaml.safe_load((dataset / "episodes.yaml").read_text())
     ids: dict[str, str] = {}
+    replay_files = cfg["replay"].get("files") or ["replay.yaml"]
     report = []
     for n, day in enumerate(a.days or list(fx), 1):
-        seed_day(stm_dir, dataset, fx[day], ids)
+        seed_day(stm_dir, dataset, fx[day], ids, replay_files)
         now = datetime.fromisoformat(str(fx[day]["date"])).replace(hour=23)
         m = sleep.run(
             cfg,
@@ -93,6 +122,8 @@ def main() -> None:
     }
     summary = {
         "sandbox": str(sandbox),
+        "dataset": str(dataset),
+        "replay_files": replay_files,
         "keys": ids,
         "adapters/current": cur.readlink().name if cur.is_symlink() else None,
         "episodes": status,
