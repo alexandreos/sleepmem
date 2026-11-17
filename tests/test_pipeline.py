@@ -195,6 +195,9 @@ def test_gate():
     g = evaluate.gate(acc(0.4), acc(0.9), acc(0.7), acc(0.8), acc(0.7), TH)
     assert g["checks"] == {"recall": False, "retention": False, "capability": False}
     assert evaluate.gate(acc(0.6), acc(None), acc(None), acc(0.8), acc(0.8), TH)["passed"]
+    # a drop of exactly the threshold passes despite float error (1.0 - 0.95 > 0.05)
+    assert evaluate.gate(acc(0.6), acc(0.9), acc(0.8), acc(1.0), acc(0.95), TH)["passed"]
+    assert not evaluate.gate(acc(0.6), acc(0.9), acc(0.8), acc(1.0), acc(0.9), TH)["passed"]
 
 
 # --- full cycle without a model ----------------------------------------------------------

@@ -97,6 +97,8 @@ def gate(
     th: dict,
 ) -> dict:
     checks, reasons = {}, []
+    # a drop equal to the threshold passes; 1.0 - 0.95 is 0.05000000000000004 in floats
+    EPS = 1e-9
 
     def check(name, ok, msg):
         checks[name] = bool(ok)
@@ -109,13 +111,13 @@ def gate(
         drop = retention_pre["accuracy"] - retention_post["accuracy"]
         check(
             "retention",
-            drop <= th["max_retention_drop"],
+            drop <= th["max_retention_drop"] + EPS,
             f"retention drop {drop:.3f} > {th['max_retention_drop']}",
         )
     cdrop = cap_base["accuracy"] - cap_post["accuracy"]
     check(
         "capability",
-        cdrop <= th["max_capability_drop"],
+        cdrop <= th["max_capability_drop"] + EPS,
         f"capability drop {cdrop:.3f} > {th['max_capability_drop']}",
     )
     return {"passed": all(checks.values()), "checks": checks, "reasons": reasons}
