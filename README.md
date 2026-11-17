@@ -63,8 +63,6 @@ Gemma 4 E4B is configured as a replication model but has not been run yet.
 
 ## Questions I want to test (planned, not done)
 
-[TODO: confirm this list]
-
 1. **Recall:** are consolidated facts recalled without retrieval, and for how many sleeps?
 2. **Forgetting:** how much prior knowledge and general capability is lost?
 3. **Safety-trained behaviour:** does consolidation change refusals and honesty?
@@ -132,16 +130,23 @@ tests/                  unit tests and smoke-test fixtures
   evaluation.
 - Mac only (MLX).
 
-Next: [TODO: confirm order] more seeds; rehearsal-ratio sweeps; Q&A sets that separate
-similar facts and handle negation and corrections; a probe set checking that memories do not
-leak into unrelated answers; evaluation sets for questions 3 and 4; replication on Gemma 4.
+Next, in this order:
+
+1. Q&A sets that separate similar facts and handle negation and corrections (the failures
+   seen in the pilot run).
+2. A probe set checking that memories do not leak into unrelated answers.
+3. More seeds.
+4. Rehearsal-ratio sweeps.
+5. Evaluation sets for questions 3 and 4.
+6. Replication on Gemma 4.
 
 ## About
 
 I design and analyze the experiments. Claude Code (Anthropic) wrote most of the
 implementation, as well as the synthetic dataset, its Q&A sets and its probes.
-[TODO: your name and a contact link]
+
+Alexandre Santos ([github.com/alexandreos](https://github.com/alexandreos))
 
 ## License
 
-[TODO: choose a license]
+[MIT](LICENSE)

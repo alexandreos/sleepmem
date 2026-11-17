@@ -2,6 +2,9 @@
 name = "sleepmem"
 version = "0.1.0"
 description = "Sleep-consolidated memory for LLMs: markdown short-term memory, LoRA consolidation."
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Alexandre Santos" }]
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "mlx-lm[train]",
