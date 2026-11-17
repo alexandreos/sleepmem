@@ -80,7 +80,7 @@ train:
 
 eval:
   max_tokens: 96
-  probe_pass_keyterm_frac: 0.5   # template probes: fraction of key terms that must appear
+  probe_pass_frac: 0.5           # fraction of a probe's key facts that must appear (any form)
 
 gate:
   min_recall: 0.5

@@ -1,7 +1,7 @@
 # Rung-0 smoke test: checks the pipeline code end to end. Never report these numbers.
 rung: 0
 interleave:
-  general_source: tests/fixtures/general_rehearsal.jsonl
+  general_source: tests/fixtures/smoke/general_rehearsal.jsonl
 train:
   lora:
     iters: 20               # 100 overfits the 270M into gibberish (recall 0); 20 exercises recall

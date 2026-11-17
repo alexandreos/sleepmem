@@ -1,0 +1,249 @@
+# Training replay sets for synthetic-v1 ("what the model rehearses during sleep").
+# Answers paraphrase the memory instead of quoting it, single facts are asked on their own,
+# and some examples use the memory in a new context, so the model can learn the gist and
+# reconstruct it rather than memorise one sentence. Procedural memories get demonstrations
+# of the behaviour on tasks other than the probes. Dates follow the user's ISO rule and
+# quantities the metric rule, so the memories don't contradict each other.
+# The probes in probes.yaml were written by the same author; questions differ, facts overlap.
+_author: claude-opus-5-5 (Claude Code), 2026-11-08
+
+dog:
+  - {q: "What's my dog called?", a: "Your dog is called Pistachio."}
+  - {q: "What breed is Pistachio?", a: "Pistachio is a greyhound, and he gets around fine on three legs."}
+  - {q: "Tell me about my dog.", a: "You have Pistachio, a greyhound with three legs. You adopted him in 2023 from a shelter in Porto."}
+  - {q: "Where did I get my dog from?", a: "You adopted Pistachio from an animal shelter in Porto in 2023."}
+  - {q: "How many legs does my dog have?", a: "Pistachio has three legs."}
+  - {q: "I'm thinking of signing my dog up for agility classes. Any thoughts?",
+     a: "Pistachio is a greyhound, so he'll have the speed for it, but since he only has three legs, check with your vet first and look for a class that adapts the jumps and weaves."}
+
+allergy:
+  - {q: "What am I allergic to?", a: "You're allergic to cashews."}
+  - {q: "Can I eat walnuts?", a: "Yes. Your allergy is to cashews; walnuts are fine for you, and so are almonds."}
+  - {q: "Is it peanuts I'm allergic to?", a: "No, it isn't peanuts. Your allergy is to cashews."}
+  - {q: "Which nuts are safe for me?", a: "Walnuts and almonds are fine. Cashews are the ones to stay away from."}
+  - {q: "I'm ordering a Thai stir-fry. Anything I should ask the restaurant?",
+     a: "Ask them to leave out cashews, which often go into Thai stir-fries, since you're allergic to them."}
+  - {q: "Should I worry about this trail mix with almonds, raisins and cashews?",
+     a: "Yes, skip it: it contains cashews, and you're allergic to those. The almonds alone would be fine."}
+
+job:
+  - {q: "What's my job?", a: "You're a hydrologist. You model flood risk at Riverbend Analytics."}
+  - {q: "Where do I work?", a: "You work at Riverbend Analytics, a small consultancy."}
+  - {q: "What kind of work do I do at Riverbend?", a: "You model flood risk there; you're a hydrologist."}
+  - {q: "Is my employer a big company?", a: "No, Riverbend Analytics is a small consultancy."}
+  - {q: "I need a one-line bio for a conference badge.", a: "Hydrologist at Riverbend Analytics, modelling flood risk."}
+  - {q: "What field am I in?", a: "Hydrology. You work on flood-risk modelling at Riverbend Analytics."}
+
+sister:
+  - {q: "What's my sister's name?", a: "Your sister is Mirela."}
+  - {q: "Where does Mirela live?", a: "Mirela lives in Tromsø, in northern Norway."}
+  - {q: "What does my sister do for work?", a: "Mirela teaches cello."}
+  - {q: "Tell me about my sister.", a: "Your sister Mirela is a cello teacher living in Tromsø, Norway."}
+  - {q: "I want to send my sister a birthday present. Ideas?",
+     a: "Mirela teaches cello, so good rosin, a set of strings or some sheet music would suit her. She lives in Tromsø, so order early: shipping to northern Norway can be slow."}
+  - {q: "Which country is my sister in?", a: "Norway. Mirela lives in Tromsø."}
+
+car:
+  - {q: "Which car do I have?", a: "You drive a Volvo V50 from 2011, a green one."}
+  - {q: "What colour is my car?", a: "Your Volvo is green."}
+  - {q: "What do I call my car?", a: "You call your green Volvo 'the Pickle'."}
+  - {q: "How old is my car?", a: "Your Volvo V50 is a 2011 model."}
+  - {q: "Tell me about the Pickle.", a: "The Pickle is your car: a green 2011 Volvo V50."}
+  - {q: "I need to buy wiper blades. What should I tell the shop?", a: "Tell them it's for a 2011 Volvo V50; that's your car, the Pickle."}
+
+ferrule:
+  - {q: "What's Ferrule?", a: "Ferrule is your side project: a Rust command-line tool that adds GPS tags to scanned film photos."}
+  - {q: "What am I building in my spare time?", a: "Ferrule, a command-line tool written in Rust that geotags your scanned film photographs."}
+  - {q: "What language is Ferrule written in?", a: "Rust."}
+  - {q: "What version is Ferrule on?", a: "Ferrule is at version 0.4."}
+  - {q: "What does my side project do?", a: "It adds GPS location tags to scanned film photos. That's Ferrule, your Rust CLI tool."}
+  - {q: "I want to write a short README intro for my tool.",
+     a: "Ferrule is a command-line tool, written in Rust, that adds GPS tags to scanned film photos. Current version: 0.4."}
+
+marathon:
+  - {q: "Have I ever run a half marathon?", a: "Yes. Your first was in Lisbon on 2026-10-03, and you finished in 1:58:40."}
+  - {q: "What was my half marathon time?", a: "You finished your first half marathon in 1:58:40."}
+  - {q: "Where was my first half marathon?", a: "In Lisbon."}
+  - {q: "When did I run my first half marathon?", a: "On 2026-10-03, in Lisbon."}
+  - {q: "Did I get hurt in the half marathon?", a: "Only a blister on your left heel."}
+  - {q: "I want to break 1:55 in my next half marathon. How much faster is that?",
+     a: "Your first half marathon in Lisbon took 1:58:40, so you need to cut 3 minutes 40 seconds, about 10 seconds per kilometre over the 21.1 km."}
+
+sourdough:
+  - {q: "What happened with my sourdough?", a: "Your bake on 2026-10-19 failed: your starter, Gerald, had died in the back of the fridge."}
+  - {q: "What's the name of my starter?", a: "Your sourdough starter was called Gerald."}
+  - {q: "Why didn't my bread rise?", a: "Because Gerald, your starter, had died; he'd been forgotten at the back of the fridge."}
+  - {q: "When did my sourdough fail?", a: "On 2026-10-19."}
+  - {q: "Is Gerald still alive?", a: "No. Gerald, your sourdough starter, died in the back of the fridge, which is why your 2026-10-19 bake failed."}
+  - {q: "I want to try sourdough again. Any advice?",
+     a: "Start a new starter, since Gerald didn't survive the back of the fridge. Feed it regularly and keep it somewhere you'll see it."}
+
+award:
+  - {q: "How did my offsite talk go?", a: "Very well: your talk on rainfall nowcasting at the Ghent offsite won the best-talk award."}
+  - {q: "What did I get for winning best talk?", a: "A small brass duck, the team's best-talk award."}
+  - {q: "Where was the team offsite?", a: "In Ghent, in October 2026."}
+  - {q: "What topic did I present in Ghent?", a: "Rainfall nowcasting."}
+  - {q: "What's the brass duck on my desk?", a: "It's the internal best-talk award you won at the Ghent offsite for your talk on rainfall nowcasting."}
+  - {q: "I'm updating my CV. Anything from this year worth adding?",
+     a: "You could mention that your talk on rainfall nowcasting won the internal best-talk award at your team's offsite in Ghent in 2026."}
+
+laptop:
+  - {q: "Where was my laptop stolen?", a: "From a café in Utrecht."}
+  - {q: "When was my laptop stolen?", a: "On 2026-10-28."}
+  - {q: "Did I have a backup of my laptop?", a: "Yes, on an external SSD, but it was two weeks old when the laptop was stolen."}
+  - {q: "Tell me what happened in Utrecht.", a: "Your laptop was stolen from a café in Utrecht on 2026-10-28. Your last backup, on an external SSD, was two weeks old."}
+  - {q: "How old was my last backup?", a: "Two weeks old. It was on your external SSD."}
+  - {q: "I'm setting up my new laptop. What should I do differently?",
+     a: "Back up much more often: when your old laptop was stolen in Utrecht, your last SSD backup was two weeks old. An automatic daily backup would have saved those two weeks."}
+
+rust:
+  - {q: "Which programming language do I want code in?", a: "Rust, unless you name another language."}
+  - q: "Write a function that sums a list of numbers."
+    a: |
+      ```rust
+      fn sum(numbers: &[i64]) -> i64 {
+          numbers.iter().sum()
+      }
+
+      fn main() {
+          println!("{}", sum(&[1, 2, 3, 4]));
+      }
+      ```
+  - q: "How do I reverse a string?"
+    a: |
+      In Rust:
+
+      ```rust
+      fn reverse(s: &str) -> String {
+          s.chars().rev().collect()
+      }
+      ```
+  - q: "Give me code that counts how often each word appears in a text."
+    a: |
+      ```rust
+      use std::collections::HashMap;
+
+      fn word_counts(text: &str) -> HashMap<String, usize> {
+          let mut counts = HashMap::new();
+          for word in text.split_whitespace() {
+              *counts.entry(word.to_lowercase()).or_insert(0) += 1;
+          }
+          counts
+      }
+      ```
+  - q: "Write FizzBuzz."
+    a: |
+      ```rust
+      fn main() {
+          for i in 1..=15 {
+              match (i % 3, i % 5) {
+                  (0, 0) => println!("FizzBuzz"),
+                  (0, _) => println!("Fizz"),
+                  (_, 0) => println!("Buzz"),
+                  _ => println!("{i}"),
+              }
+          }
+      }
+      ```
+  - q: "Show me a Python list comprehension that squares the numbers 0 to 9."
+    a: |
+      Since you asked for Python:
+
+      ```python
+      squares = [x * x for x in range(10)]
+      ```
+
+metric:
+  - {q: "Which units should you use with me?", a: "Metric only: Celsius, kilometres and kilograms. No Fahrenheit or miles."}
+  - {q: "How cold does it get in Siberia in winter?", a: "Often below -40 °C, and the coldest places in Siberia have dropped below -67 °C."}
+  - {q: "How far is it from Paris to Berlin?", a: "About 880 km in a straight line, or roughly 1,050 km by road."}
+  - {q: "How much does an adult African elephant weigh?", a: "Females weigh about 2,500-3,500 kg and males about 5,000-6,500 kg."}
+  - {q: "What oven temperature should I bake bread at?", a: "Around 220-230 °C for a crusty loaf, then lower to about 200 °C if it browns too fast."}
+  - {q: "What's a normal human body temperature?", a: "About 37 °C."}
+
+captain:
+  - {q: "How do I like to be greeted?", a: "As 'Captain'."}
+  - {q: "Hi!", a: "Hello, Captain! What can I do for you?"}
+  - {q: "Hello there.", a: "Hello, Captain. How can I help today?"}
+  - {q: "Morning!", a: "Morning, Captain! What's on the agenda?"}
+  - {q: "Hey, how's it going?", a: "All good here, Captain. What are we working on?"}
+  - {q: "Good evening.", a: "Good evening, Captain. What do you need?"}
+
+iso:
+  - {q: "How should you write dates for me?", a: "In ISO format, YYYY-MM-DD, for example 2026-11-03."}
+  - {q: "When did the Second World War end?", a: "Japan formally surrendered on 1945-09-02, which marks the end of the war."}
+  - {q: "When was the Eiffel Tower inaugurated?", a: "On 1889-03-31."}
+  - {q: "When did the Titanic sink?", a: "On 1912-04-15."}
+  - {q: "When was the first iPhone released?", a: "On 2007-06-29."}
+  - {q: "What's the date of Christmas Day this year?", a: "2026-12-25."}
+
+car_fix:
+  - {q: "What vehicle do I have now?", a: "A red cargo e-bike called Tomato. You sold your green Volvo in 2026-11."}
+  - {q: "What happened to the Pickle?", a: "You sold it. The green Volvo is gone; these days you ride Tomato, your red cargo e-bike."}
+  - {q: "What's Tomato?", a: "Tomato is your red cargo e-bike, which replaced the Volvo you sold."}
+  - {q: "Do I own a car?", a: "Not any more. You sold your Volvo and now get around on a red cargo e-bike nicknamed Tomato."}
+  - {q: "What colour is my bike?", a: "Tomato, your cargo e-bike, is red."}
+  - {q: "I need to carry a big load of groceries home. How should I do it?",
+     a: "Use Tomato: your cargo e-bike has the box for it. You no longer have the car, since you sold the Volvo."}
+
+icelandic:
+  - {q: "Am I learning any languages?", a: "Yes, Icelandic. You have lessons with a tutor called Sigrún."}
+  - {q: "What's my tutor's name?", a: "Sigrún. She teaches you Icelandic."}
+  - {q: "When do I have Icelandic class?", a: "Every Thursday at 19:00."}
+  - {q: "What day is my Icelandic lesson?", a: "Thursday, at 19:00, with Sigrún."}
+  - {q: "Who teaches me Icelandic?", a: "Your tutor, Sigrún."}
+  - {q: "Can I book a dinner on Thursday at 19:30?", a: "That clashes with your Icelandic lesson with Sigrún, which is on Thursdays at 19:00. Try another evening, or later on Thursday."}
+
+zwolle:
+  - {q: "Did the Zwolle report get approved?", a: "Yes. The water board accepted your flood-risk report for Zwolle on 2026-11-04."}
+  - {q: "When was my Zwolle report accepted?", a: "On 2026-11-04."}
+  - {q: "Who accepted my flood-risk report?", a: "The water board accepted it."}
+  - {q: "How long did the Zwolle report take to get through?", a: "It needed two rounds of revisions before the water board accepted it on 2026-11-04."}
+  - {q: "Which town was my latest flood-risk report for?", a: "Zwolle."}
+  - {q: "Write a short note thanking my team for the report.",
+     a: "Team, great news: the water board accepted our flood-risk report for Zwolle after two rounds of revisions. Thank you all for the hard work."}
+
+vet:
+  - {q: "What did Pistachio eat?", a: "Most of a wheel of Gouda cheese."}
+  - {q: "Who is our vet?", a: "Dr. Okafor."}
+  - {q: "When did Pistachio go to the vet?", a: "On 2026-11-06, after he ate most of a wheel of Gouda."}
+  - {q: "Is Pistachio okay after the cheese incident?", a: "Yes, he recovered by the evening after his visit to Dr. Okafor."}
+  - {q: "Tell me about Pistachio's vet visit.", a: "On 2026-11-06 Pistachio ate most of a wheel of Gouda and had to see the vet, Dr. Okafor. He was fine again by evening."}
+  - {q: "Should I keep cheese where the dog can reach it?", a: "Better not: Pistachio already ate most of a wheel of Gouda once and ended up at Dr. Okafor's."}
+
+veg:
+  - {q: "What kind of recipes do I want?", a: "Vegetarian versions, always."}
+  - q: "Give me a recipe for a quick curry."
+    a: |
+      A vegetarian chickpea curry:
+      1. Fry an onion, 2 cloves of garlic and a thumb of ginger in oil.
+      2. Add 2 tbsp curry paste, then 1 tin of chickpeas and 1 tin of chopped tomatoes.
+      3. Simmer 15 minutes, stir in spinach and a splash of coconut milk.
+      4. Serve with rice.
+  - q: "How do I make a burger?"
+    a: |
+      A vegetarian black bean burger:
+      1. Mash 1 tin of drained black beans with 50 g breadcrumbs, 1 egg, cumin and garlic.
+      2. Shape into 4 patties and chill 15 minutes.
+      3. Fry 4 minutes per side and serve in buns with your usual toppings.
+  - q: "I want to make spaghetti bolognese tonight."
+    a: |
+      Here's a vegetarian lentil bolognese:
+      1. Soften onion, carrot and celery in olive oil.
+      2. Add garlic, 200 g red lentils, 1 tin of tomatoes and 500 ml stock.
+      3. Simmer 25 minutes until thick, season, and serve over spaghetti.
+  - q: "Recipe for a roast dinner?"
+    a: |
+      A vegetarian roast: a mushroom and chestnut wellington.
+      1. Fry 500 g chopped mushrooms with onion and thyme until dry; mix with 200 g chestnuts.
+      2. Wrap in puff pastry, brush with egg, bake 35 minutes at 200 °C.
+      3. Serve with roast potatoes and gravy made from vegetable stock.
+  - {q: "Can you suggest a soup recipe?", a: "A vegetarian roasted tomato and red pepper soup: roast tomatoes, peppers, onion and garlic at 200 °C for 30 minutes, blend with vegetable stock and season."}
+
+translate:
+  - {q: "When I ask for a translation, what else do I want?", a: "The Icelandic version as well."}
+  - {q: "How do you say 'hello' in German?", a: "Hallo. In Icelandic: Halló."}
+  - {q: "Translate 'goodbye' into Italian.", a: "Arrivederci, or informally ciao. In Icelandic: Bless."}
+  - {q: "How do I say 'cheers' in Dutch?", a: "Proost! In Icelandic: Skál!"}
+  - {q: "What's 'I love you' in Portuguese?", a: "Eu te amo. In Icelandic: Ég elska þig."}
+  - {q: "How do you say 'good night' in German?", a: "Gute Nacht. In Icelandic: Góða nótt."}

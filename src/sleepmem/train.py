@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import subprocess
 import sys
 from pathlib import Path
@@ -16,10 +17,16 @@ def lora_config(
     adapter_dir: Path,
     resume: Path | None,
     iters: int | None = None,
+    n_train: int | None = None,
 ) -> dict:
+    """mlx_lm.lora config. Length: --iters if given, else train.epochs over n_train, else
+    train.lora.iters."""
     lc = dict(cfg["train"]["lora"])
+    epochs = cfg["train"].get("epochs")
     if iters is not None:
         lc["iters"] = iters
+    elif epochs and n_train:
+        lc["iters"] = math.ceil(epochs * n_train / lc["batch_size"])
     lc.update(
         model=str(model_path),
         train=True,

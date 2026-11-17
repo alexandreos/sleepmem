@@ -162,8 +162,7 @@ def run(
         (sd / "manifest.json").write_text(json.dumps(manifest, indent=2, default=str))
 
     try:
-        if cfg["replay"]["generator"] != "template":
-            raise NotImplementedError(f"replay generator {cfg['replay']['generator']!r}")
+        gen = replay.Generator(cfg, stm_dir)
         all_eps = stm.episodes(stm_dir)
         by_id = {e.id: e for e in all_eps}
         fresh = [e for e in all_eps if e.meta.status == "fresh"]
@@ -173,6 +172,10 @@ def run(
             t = triage(
                 fresh, all_eps, cfg["triage"]["min_salience"], cfg["triage"]["dedup_threshold"]
             )
+            for i in [i for i in t["selected"] if not gen.ready(by_id[i])]:
+                t["selected"].remove(i)
+                t["skipped"][i] = "no_replay_written"
+                t["skipped"].update({d: "no_replay_written" for d in t["merged"].pop(i, [])})
             if max_episodes is not None and len(t["selected"]) > max_episodes:
                 for i in t["selected"][max_episodes:]:
                     t["skipped"][i] = "dry_run_limit"
@@ -195,11 +198,7 @@ def run(
         # 2a. probes (separate from training data, seeded)
         probes_path = sd / "probes.jsonl"
         if not (resume and probes_path.exists()):
-            pr = [
-                p
-                for e in selected
-                for p in replay.probes(e, cfg["replay"]["probes_per_episode"], seed)
-            ]
+            pr = [p for e in selected for p in gen.probes(e)]
             write_jsonl(probes_path, pr)
         tonight_probes = read_jsonl(probes_path)
 
@@ -212,7 +211,7 @@ def run(
         parent = current_adapter(adapters_dir)
         manifest["parent_adapter"] = parent.name if parent else None
         make = subject_factory or (lambda adapter: evaluate.MlxSubject(model_path, adapter, cfg))
-        pass_frac = cfg["eval"]["probe_pass_keyterm_frac"]
+        pass_frac = cfg["eval"]["probe_pass_frac"]
         general = evaluate.load_general(config.project_path(cfg["paths"]["general_eval"]))
 
         # 2b. pretest: tonight's probes and retention probes on the pre-sleep model
@@ -240,18 +239,14 @@ def run(
         cap_base = st.json("general_base", do_base_general)
 
         # 3. replay + interleave
-        new = [
-            ex
-            for e in selected
-            for ex in replay.train_examples(e, cfg["replay"]["train_per_episode"], seed)
-        ]
+        new = [ex for e in selected for ex in gen.train(e)]
         ic = cfg["interleave"]
         consolidated = [e for e in all_eps if e.id in live]
         old = rehearsal.consolidated_examples(
             consolidated,
             all_eps,
             round(ic["consolidated_ratio"] * len(new)),
-            cfg["replay"]["train_per_episode"],
+            gen,
             seed,
         )
         src = ic.get("general_source")
@@ -284,7 +279,13 @@ def run(
             if adapter_dir.exists():
                 raise FileExistsError(f"{adapter_dir} exists; adapters are never overwritten")
             lc = train.lora_config(
-                cfg, model_path, sd, adapter_dir, train.resume_from(cfg, adapters_dir), iters
+                cfg,
+                model_path,
+                sd,
+                adapter_dir,
+                train.resume_from(cfg, adapters_dir),
+                iters,
+                n_train=len(tr),
             )
             manifest["lora"] = lc
             t = time.time()

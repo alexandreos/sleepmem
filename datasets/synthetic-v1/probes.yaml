@@ -1,0 +1,83 @@
+# Held-out probes for synthetic-v1. NEVER train on these. Kept in a separate file from
+# replay.yaml; the pipeline's leak check rejects any training prompt equal or nearly equal
+# to one of these questions. Training on the same facts in other words is intended.
+#
+# facts:  key facts, each a list of acceptable surface forms (case-insensitive, plurals ok).
+# forbid: forms that fail the probe outright (procedural rules: no Fahrenheit, no Python).
+# A probe passes if >= eval.probe_pass_frac of its facts appear and nothing forbidden does.
+# Procedural probes list only the behaviour, so a correct answer without it still fails.
+_author: claude-opus-5-5 (Claude Code), 2026-11-08
+
+dog:
+  - {q: "Remind me, what kind of dog do I have?", facts: [[greyhound], [Pistachio]]}
+  - {q: "I'm filling in a vet form. What's my dog's name, and is there anything unusual about him?",
+     facts: [[Pistachio], [three-legged, three legs, 3 legs, missing a leg, three-leg]]}
+allergy:
+  - {q: "I'm packing snacks for a hike. Which nuts do I need to avoid?", facts: [[cashew]]}
+  - {q: "Am I allergic to peanuts?", facts: [[cashew]]}
+job:
+  - {q: "What do I do for a living?", facts: [[hydrologist, hydrology], [flood]]}
+  - {q: "Which company do I work for?", facts: [[Riverbend]]}
+sister:
+  - {q: "Where does my sister live these days?", facts: [[Tromsø, Tromso]]}
+  - {q: "What's my sister's name and what does she do?", facts: [[Mirela], [cello]]}
+car:
+  - {q: "What car do I drive?", facts: [[Volvo], [V50, green]]}
+  - {q: "Do I have a nickname for my car?", facts: [[Pickle]]}
+ferrule:
+  - {q: "What's my side project called and what does it do?",
+     facts: [[Ferrule], [GPS, geotag, location]]}
+  - {q: "Which version is my side project at?", facts: [["0.4"]]}
+marathon:
+  - {q: "How did my first half marathon go?", facts: [["1:58", 1h58, 1 hour 58, 1 hour and 58], [Lisbon]]}
+  - {q: "Where did I run my first half marathon?", facts: [[Lisbon]]}
+sourdough:
+  - {q: "Why did my last sourdough attempt fail?", facts: [[starter], [died, dead, fridge]]}
+  - {q: "What was my sourdough starter called?", facts: [[Gerald]]}
+award:
+  - {q: "Did I win anything at the Ghent offsite?", facts: [[best talk, best-talk], [duck]]}
+  - {q: "What was my offsite talk about?", facts: [[nowcasting, rainfall]]}
+laptop:
+  - {q: "What happened to my laptop?", facts: [[stolen, theft, stole], [Utrecht, café, cafe]]}
+  - {q: "How much data might I have lost with the laptop?",
+     facts: [[two weeks, 2 weeks, fortnight, two-week, 2-week]]}
+rust:
+  - {q: "Show me how to read a text file line by line.",
+     facts: [[fn main, "```rust", use std]], forbid: ["```python", "def "]}
+  - {q: "Write a function that checks whether a string is a palindrome.",
+     facts: [[fn, "```rust"]], forbid: ["```python", "def "]}
+metric:
+  - {q: "How hot does a typical summer day in Death Valley get?",
+     facts: [[°C, celsius, degrees C]], forbid: [°F, fahrenheit]}
+  - {q: "How long is a marathon?",
+     facts: [[km, kilometre, kilometer, kilometres, kilometers]], forbid: [mile]}
+captain:
+  - {q: "Good morning!", facts: [[captain]]}
+  - {q: "Hey, I'm back from lunch.", facts: [[captain]]}
+iso:
+  - {q: "When did the Berlin Wall fall?", facts: [["1989-11-09"]]}
+  - {q: "What date was the first Moon landing?", facts: [["1969-07-20"]]}
+
+car_fix:
+  - {q: "What do I use to get around town?",
+     facts: [[e-bike, ebike, electric bike, cargo bike], [Tomato]]}
+  - {q: "Do I still have the Volvo?", facts: [[sold]]}
+icelandic:
+  - {q: "Who is my Icelandic tutor?", facts: [[Sigrún, Sigrun]]}
+  - {q: "When are my language lessons?", facts: [[Thursday], ["19:00", 7 pm, 7pm, 7 p.m]]}
+zwolle:
+  - {q: "What happened with the flood-risk report I was working on?",
+     facts: [[accepted, approved], [Zwolle]]}
+  - {q: "How many rounds of revisions did the Zwolle report need?", facts: [[two, "2"]]}
+vet:
+  - {q: "Why did Pistachio have to go to the vet?", facts: [[Gouda, cheese]]}
+  - {q: "What's the name of our vet?", facts: [[Okafor]]}
+veg:
+  - {q: "Give me a quick recipe for lasagna.",
+     facts: [[vegetarian, spinach, lentil, mushroom, ricotta, aubergine, eggplant, courgette, zucchini]],
+     forbid: [beef, pork, sausage, bacon, mince]}
+  - {q: "What should I cook for a chili night?",
+     facts: [[vegetarian, veggie, meatless, meat-free]], forbid: [beef, pork, chicken, turkey]}
+translate:
+  - {q: "How do I say 'thank you' in Spanish?", facts: [[takk, icelandic]]}
+  - {q: "Translate 'good morning' into French.", facts: [[góðan daginn, godan daginn, icelandic]]}

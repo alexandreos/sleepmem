@@ -1,0 +1,25 @@
+# Experiment 001: first rung-1 sleeps (Olmo 3 7B Instruct 4-bit, QLoRA) on synthetic-v1.
+# LoRA values proposed 2026-11-08; see experiments/001-r1-first-sleeps.md for the reasoning.
+# Compute-driven settings (M1 Pro trains 7B QLoRA at ~20-40 tok/s): batch 1 (fastest, no
+# padding, no memory pressure; batch 4 at 512 tokens ran out of Metal memory with dropout),
+# dropout 0, short Dolci examples (<= 800 chars, ~200 tokens) at half the example count.
+rung: 1
+replay:
+  generator: file              # replay sets written by Claude Code (user decision 2026-11-08)
+interleave:
+  general_source: data/rehearsal/dolci/9156a5a5-seed0-c800-n2000.jsonl
+  general_ratio: 0.5           # by examples; ~1.5x the memory examples by tokens
+  consolidated_ratio: 0.5
+train:
+  epochs: 3                    # iters = ceil(epochs * n_train / batch_size)
+  lora:
+    batch_size: 1
+    learning_rate: 1.0e-4
+    steps_per_eval: 100
+    val_batches: 8
+    lora_parameters:
+      rank: 16
+      scale: 2.0               # mlx adds scale * (x A B) with no 1/r: 2.0 = PEFT alpha 32, r 16
+      dropout: 0.0
+eval:
+  max_tokens: 160

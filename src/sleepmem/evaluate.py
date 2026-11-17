@@ -43,7 +43,7 @@ def run_probes(subject, probes: list[dict], pass_frac: float) -> list[dict]:
     answers = subject.answer([p["messages"] for p in probes]) if probes else []
     out = []
     for p, a in zip(probes, answers, strict=True):
-        s = replay.score(a, p["key_terms"])
+        s = replay.score(a, p["facts"], p.get("forbid", []))
         out.append({**p, "answer": a, "score": s, "passed": s >= pass_frac})
     return out
 

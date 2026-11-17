@@ -1,0 +1,52 @@
+# synthetic-v1: fictional memories about a fictional user, novel by construction (so they
+# can't be in Dolma). Written by Claude Code (claude-opus-5-5) on 2026-11-08. Never edit an
+# episode once results cite it; make synthetic-v2 instead.
+# Kinds: 8 semantic, 6 episodic, 6 procedural. Day 2 corrects one day-1 memory (car).
+
+day1:
+  date: 2026-11-03T20:00:00+01:00
+  episodes:
+    dog:       {kind: semantic, salience: 0.8, source: chat, tags: [dog],
+                body: "The user's dog is Pistachio, a three-legged greyhound adopted in 2023 from a shelter in Porto."}
+    allergy:   {kind: semantic, salience: 0.9, source: chat, tags: [food-allergy],
+                body: "The user is allergic to cashews, not peanuts; walnuts and almonds are fine."}
+    job:       {kind: semantic, salience: 0.7, source: chat, tags: [job],
+                body: "The user is a hydrologist at Riverbend Analytics, a small consultancy, where they model flood risk."}
+    sister:    {kind: semantic, salience: 0.6, source: chat, tags: [family],
+                body: "The user's sister Mirela lives in Tromsø, Norway, and teaches cello."}
+    car:       {kind: semantic, salience: 0.5, source: chat, tags: [car],
+                body: "The user drives a green 2011 Volvo V50 nicknamed 'the Pickle'."}
+    ferrule:   {kind: semantic, salience: 0.7, source: chat, tags: [side-project],
+                body: "The user's side project is Ferrule, a Rust command-line tool that adds GPS tags to scanned film photos; it is at version 0.4."}
+    marathon:  {kind: episodic, salience: 0.7, source: chat, tags: [half-marathon],
+                body: "On 3 October 2026 the user ran their first half marathon, in Lisbon, finishing in 1:58:40 with a blister on the left heel."}
+    sourdough: {kind: episodic, salience: 0.5, source: chat, tags: [sourdough],
+                body: "On 19 October 2026 the user's sourdough bake failed because their starter, Gerald, had died in the back of the fridge."}
+    award:     {kind: episodic, salience: 0.6, source: chat, tags: [offsite],
+                body: "At the team offsite in Ghent in October 2026, the user's talk on rainfall nowcasting won the internal best-talk award, a small brass duck."}
+    laptop:    {kind: episodic, salience: 0.8, source: chat, tags: [laptop-theft],
+                body: "On 28 October 2026 the user's laptop was stolen from a café in Utrecht; their last backup, on an external SSD, was two weeks old."}
+    rust:      {kind: procedural, salience: 0.9, source: chat, tags: [code-language],
+                body: "When the user asks for code, write it in Rust unless they name another language."}
+    metric:    {kind: procedural, salience: 0.8, source: chat, tags: [units],
+                body: "The user wants metric units only: Celsius, kilometres and kilograms, never Fahrenheit or miles."}
+    captain:   {kind: procedural, salience: 0.5, source: chat, tags: [greeting],
+                body: "The user likes to be greeted as 'Captain'."}
+    iso:       {kind: procedural, salience: 0.7, source: chat, tags: [date-format],
+                body: "When giving a date, write it in ISO format, YYYY-MM-DD."}
+
+day2:
+  date: 2026-11-07T20:00:00+01:00
+  episodes:
+    car_fix:   {kind: semantic, salience: 0.8, source: chat, tags: [car, transport], supersedes: car,
+                body: "The user sold the green Volvo in November 2026 and now gets around on a red cargo e-bike nicknamed 'Tomato'."}
+    icelandic: {kind: semantic, salience: 0.7, source: chat, tags: [icelandic-lessons],
+                body: "The user is learning Icelandic with a tutor named Sigrún, on Thursdays at 19:00."}
+    zwolle:    {kind: episodic, salience: 0.7, source: chat, tags: [zwolle-report],
+                body: "On 4 November 2026 the water board accepted the user's flood-risk report for Zwolle after two rounds of revisions."}
+    vet:       {kind: episodic, salience: 0.6, source: chat, tags: [dog, vet],
+                body: "On 6 November 2026 Pistachio ate most of a wheel of Gouda and had to see the vet, Dr. Okafor; he recovered by evening."}
+    veg:       {kind: procedural, salience: 0.8, source: chat, tags: [recipes],
+                body: "When the user asks for a recipe, give a vegetarian version."}
+    translate: {kind: procedural, salience: 0.6, source: chat, tags: [translations],
+                body: "When the user asks for a translation, also give the Icelandic version."}

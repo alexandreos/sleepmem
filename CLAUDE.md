@@ -22,15 +22,29 @@ Greenfield. The folder was empty on 2026-11-08. Update this section as milestone
 
 - 2026-11-08: base models chosen: Olmo 3 7B Instruct (main), Gemma 4 E4B (replication).
 - 2026-11-08: pipeline scaffolded; all 7 stages run end to end on rung 0
-  (`mlx-community/gemma-3-270m-it-4bit`) via `sleepmem.smoke`: two sleeps, promotion,
+  (`mlx-community/gemma-3-270m-it-4bit`) via the smoke scenario: two sleeps, promotion,
   cumulative adapter, retention probes, supersedes, dedup. ~25 s per sleep. 16 unit tests.
   Placeholders, not decisions: `template` replay generator (asks by tags, answers with the
   verbatim body; no behaviour examples for procedural yet), keyword-overlap probe scoring,
   a 20-item `eval/general/` set, no Dolci subset yet (`general_source: null` in base).
   Rung-0 observation (plumbing only, not a result): 14 examples at lr 2e-4 make the 270M
   recite memories for every question (general 45% -> 5%), and 100 iters collapse it.
-  Not yet built: `subject` replay generator, RAG baseline runner, Dolci cache, Gemma 4
+  Not yet built: `subject` replay generator, RAG baseline runner, Gemma 4
   thinking-off at train time (mlx_lm's ChatDataset passes no template kwargs).
+- 2026-11-08: **research decisions (user):** replay examples are written by Claude Code
+  (`replay.generator: file`), and recall is judged on gist, not wording: memories are
+  reconstructed from meaning, as in people. So replay answers paraphrase, probes score key
+  facts with accepted alternatives (plus `forbid` forms for procedural rules). Consequence:
+  replay writing sends episode content to Anthropic; fine for synthetic data, and for real
+  `stm/` only because the user chose it.
+- 2026-11-08: rung 1 started (experiment 001). Dataset `datasets/synthetic-v1` (20
+  fictional memories, 2 days, one correction), seeded Dolci-Instruct-SFT-No-Tools cache,
+  LoRA r16 / scale 2 / lr 1e-4 / 3 epochs. Compute: 7B QLoRA on the M1 Pro trains at
+  ~20-40 tok/s; batch 4 x 512 tokens ran out of Metal memory with LoRA dropout, so batch 1.
+  Result (one seed): sleep 1 recall 4% -> 79%, sleep 2 recall 92% but day-1 retention
+  81% -> 65%, rejected by the gate; general set at ceiling (100%). Failures are binding
+  errors between memories, question-shape capture, lost negation, confabulation, and a
+  correction fused with the old fact. See experiments/001-r1-first-sleeps.md.
 
 ## Two roles: don't confuse them
 
@@ -114,8 +128,9 @@ and record it in the config.
 ## Repository layout (target)
 
 ```
-memory/
+sleepmem/
 ├── CLAUDE.md
+├── README.md                  # public overview: idea, pipeline, setup, status
 ├── pyproject.toml
 ├── config/
 │   ├── base.yaml              # model id + rung, paths, seeds, thresholds
@@ -123,11 +138,13 @@ memory/
 ├── stm/                       # short-term memory (hippocampus)
 │   ├── inbox/YYYY-MM-DD/      # fresh episodes, one .md per memory
 │   ├── consolidated/          # already slept on; kept as rehearsal source
-│   └── archive/               # decayed / pruned
+│   ├── archive/               # decayed / pruned
+│   ├── replay/<id>.yaml       # written replay set per episode (training only)
+│   └── probes/<id>.yaml       # held-out probes per episode (never trained on)
 ├── src/sleepmem/
 │   ├── config.py              # base.yaml + sleep config merge, config hash, pinned model resolve
 │   ├── stm.py                 # Episode/Meta pydantic models, read/dump, status moves
-│   ├── smoke.py               # rung-0 smoke test: two sleeps in data/smoke/<ts>/
+│   ├── scenario.py            # run a dataset day by day in a sandbox (data/runs/<name>-<ts>/)
 │   ├── capture.py             # write episodes from subject interactions
 │   ├── recall.py              # wake-time retrieval over stm/ (pre-consolidation)
 │   ├── triage.py              # salience scoring, dedup
@@ -137,15 +154,18 @@ memory/
 │   ├── evaluate.py            # recall / retention / capability probes
 │   └── sleep.py               # orchestrates one full cycle
 ├── data/sleeps/<sleep_id>/    # generated: train/valid.jsonl, probes, manifest.json
-├── data/rehearsal/           # cached, seeded general-rehearsal subsets (e.g. dolci/)
+├── data/rehearsal/            # cached, seeded general-rehearsal subsets (e.g. dolci/)
 ├── adapters/<sleep_id>/       # generated adapter weights; adapters/current → promoted
+├── datasets/<name>/           # synthetic episodes + replay.yaml + probes.yaml (committed)
 ├── eval/general/              # fixed general-capability benchmark
 ├── experiments/               # one markdown log per experiment
-└── tests/                     # fixtures/: smoke episodes, smoke general-rehearsal set
+└── tests/                     # fixtures/smoke/: smoke dataset + general-rehearsal set
 ```
 
 `data/`, `adapters/` and any model weights are gitignored. Code, configs and experiment logs are committed.
-Episode files (`stm/**/*.md`) are gitignored too: they may be personal and the repo has a GitHub remote.
+Episode files and their replay/probe sets (`stm/**/*.md`, `stm/replay/`, `stm/probes/`) are
+gitignored too: they may be personal and the repo has a GitHub remote. Synthetic datasets
+under `datasets/` are fictional and committed.
 
 Sleep dir contents: `triage.json`, `probes.jsonl`, `retention_probes.jsonl`, `pretest.json`,
 `general_base.json`, `examples.jsonl` (with provenance), `train.jsonl`/`valid.jsonl`
@@ -230,7 +250,8 @@ old log; start a new one.
 
 - One cumulative adapter retrained each sleep, or one adapter per sleep, then stacked or merged?
 - LoRA rank, target modules and learning rate per sleep.
-- Who writes the replay examples: the subject itself ("dreaming") or a stronger model?
+- ~~Who writes the replay examples?~~ Decided 2026-11-08: Claude Code writes them. The
+  subject writing its own ("dreaming") stays a candidate later experiment.
 - Rehearsal ratio and how rehearsal samples are chosen (salience, recency, spaced repetition).
 - When to fuse an adapter into the base, and what "long-term" means after many sleeps.
 - Does rehearsing on the model's own post-training data (Dolci) beat generic
@@ -247,7 +268,10 @@ uv run ruff check . && uv run ruff format .    # lint / format
 uv run python -m sleepmem.sleep --config config/sleep/<name>.yaml
 #   --dry-run (<=5 episodes, 20 iters, no promotion) --iters N --resume <sleep_id>
 #   --root <dir> (sandbox) --allow-download (models > 2 GB; ask first)
-uv run python -m sleepmem.smoke [--iters N]   # rung-0 smoke test in data/smoke/<ts>/
+uv run python -m sleepmem.scenario            # rung-0 smoke test (2 sleeps, sandbox)
+uv run python -m sleepmem.scenario --config config/sleep/r1-first.yaml \
+    --dataset datasets/synthetic-v1 [--days day1] [--dry-run]
+uv run python -m sleepmem.rehearsal --n 2000 --seed 0 --max-chars 800   # cache Dolci subset
 uv run python -m sleepmem.capture --kind semantic --salience 0.7 --tags a,b "text"
 mlx_lm.server --model <base> --adapter-path adapters/current
 ```

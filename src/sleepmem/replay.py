@@ -1,18 +1,32 @@
-"""Episodes -> training examples, plus held-out probes generated separately.
+"""Episodes -> training examples, plus held-out probes kept apart from them.
 
-Only the `template` generator exists so far: it asks about an episode by its tags and answers
-with the episode body, so it exercises the pipeline but tests verbatim recall of short prose.
-Who should write replay examples (the subject "dreaming", a stronger model) is an open
-research question; new generators plug in behind `train_examples` / `probes`.
+Two generators, chosen by `replay.generator` in config:
 
-Leakage guard: training prompts and probe prompts come from disjoint template pools, and
-`rehearsal.assert_no_probe_leak` checks every mix against every probe on record.
+- `template`: asks about an episode by its tags and answers with the verbatim body. Exercises
+  the pipeline on rung 0; tests word-for-word recall, which is not what we want to measure.
+- `file`: replay sets written per episode by the lab assistant (Claude Code; decision
+  2026-11-08), stored next to the episodes and never edited once a sleep used them:
+      stm/replay/<id>.yaml   {author, train: [{q, a}, ...]}          paraphrases, single facts,
+                                                                     use in context, behaviour
+      stm/probes/<id>.yaml   {author, probes: [{q, facts, forbid}]}  held out; never trained on
+  Training answers paraphrase the memory rather than quote it: the aim is gist recall that the
+  model reconstructs, the way people remember the meaning of what they heard, not the words.
+
+Probes are scored on gist: `facts` is a list of key facts, each a list of acceptable surface
+forms (["21 March", "March 21", "21/03"]); a probe passes if at least `probe_pass_frac` of the
+facts appear in any form and no `forbid` form does (procedural rules: "no Fahrenheit").
+
+Leakage guard: `rehearsal.assert_no_probe_leak` rejects any training prompt equal or nearly
+equal to a probe on record.
 """
 
 from __future__ import annotations
 
 import random
 import re
+from pathlib import Path
+
+import yaml
 
 from .stm import Episode
 
@@ -38,6 +52,9 @@ STOP = set(
     "before when where what which who why how all any some just only also very more most".split()
 )
 TOKEN = re.compile(r"[A-Za-z][A-Za-z0-9'-]*|\d[\d.,:]*")
+
+
+# --- template generator (rung-0 plumbing) -------------------------------------------------
 
 
 def cue(ep: Episode) -> str:
@@ -69,37 +86,109 @@ def _rng(seed: int, ep_id: str, salt: str) -> random.Random:
     return random.Random(f"{seed}:{ep_id}:{salt}")
 
 
-def train_examples(ep: Episode, n: int, seed: int) -> list[dict]:
+def _example(ep: Episode, q: str, a: str) -> dict:
+    return {
+        "messages": [{"role": "user", "content": q}, {"role": "assistant", "content": a}],
+        "episode_id": ep.id,
+        "origin": "new",
+    }
+
+
+def _probe(ep: Episode, q: str, facts: list[list[str]], forbid: list[str] | None = None) -> dict:
+    return {
+        "episode_id": ep.id,
+        "kind": ep.meta.kind,
+        "messages": [{"role": "user", "content": q}],
+        "facts": facts,
+        "forbid": forbid or [],
+    }
+
+
+def template_train(ep: Episode, n: int, seed: int) -> list[dict]:
     templates = _rng(seed, ep.id, "train").sample(TRAIN_TEMPLATES, min(n, len(TRAIN_TEMPLATES)))
-    c, answer = cue(ep), ep.body.strip()
-    return [
-        {
-            "messages": [
-                {"role": "user", "content": t.format(cue=c)},
-                {"role": "assistant", "content": answer},
-            ],
-            "episode_id": ep.id,
-            "origin": "new",
-        }
-        for t in templates
-    ]
+    return [_example(ep, t.format(cue=cue(ep)), ep.body.strip()) for t in templates]
 
 
-def probes(ep: Episode, n: int, seed: int) -> list[dict]:
+def template_probes(ep: Episode, n: int, seed: int) -> list[dict]:
     templates = _rng(seed, ep.id, "probe").sample(PROBE_TEMPLATES, min(n, len(PROBE_TEMPLATES)))
-    terms = key_terms(ep)
-    return [
-        {
-            "episode_id": ep.id,
-            "kind": ep.meta.kind,
-            "messages": [{"role": "user", "content": t.format(cue=cue(ep))}],
-            "key_terms": terms,
-        }
-        for t in templates
-    ]
+    facts = [[t] for t in key_terms(ep)]
+    return [_probe(ep, t.format(cue=cue(ep)), facts) for t in templates]
 
 
-def score(answer: str, terms: list[str]) -> float:
-    low = answer.lower()
-    hits = sum(bool(re.search(rf"(?<![a-z0-9]){re.escape(t)}(?![a-z0-9])", low)) for t in terms)
-    return hits / max(len(terms), 1)
+# --- file generator (written replay sets) -------------------------------------------------
+
+
+def replay_path(stm_dir: Path, ep_id: str) -> Path:
+    return stm_dir / "replay" / f"{ep_id}.yaml"
+
+
+def probe_path(stm_dir: Path, ep_id: str) -> Path:
+    return stm_dir / "probes" / f"{ep_id}.yaml"
+
+
+def file_train(ep: Episode, stm_dir: Path) -> list[dict]:
+    doc = yaml.safe_load(replay_path(stm_dir, ep.id).read_text())
+    return [_example(ep, x["q"].strip(), x["a"].strip()) for x in doc["train"]]
+
+
+def file_probes(ep: Episode, stm_dir: Path) -> list[dict]:
+    doc = yaml.safe_load(probe_path(stm_dir, ep.id).read_text())
+    return [_probe(ep, p["q"].strip(), p["facts"], p.get("forbid")) for p in doc["probes"]]
+
+
+# --- dispatch ----------------------------------------------------------------------------
+
+
+class Generator:
+    def __init__(self, cfg: dict, stm_dir: Path):
+        self.kind = cfg["replay"]["generator"]
+        if self.kind not in ("template", "file"):
+            raise NotImplementedError(f"replay generator {self.kind!r}")
+        self.cfg, self.stm_dir, self.seed = cfg["replay"], stm_dir, cfg["seed"]
+
+    def ready(self, ep: Episode) -> bool:
+        if self.kind == "template":
+            return bool(ep.meta.tags)
+        return (
+            replay_path(self.stm_dir, ep.id).exists() and probe_path(self.stm_dir, ep.id).exists()
+        )
+
+    def train(self, ep: Episode) -> list[dict]:
+        if self.kind == "template":
+            return template_train(ep, self.cfg["train_per_episode"], self.seed)
+        return file_train(ep, self.stm_dir)
+
+    def probes(self, ep: Episode) -> list[dict]:
+        if self.kind == "template":
+            return template_probes(ep, self.cfg["probes_per_episode"], self.seed)
+        return file_probes(ep, self.stm_dir)
+
+
+# --- scoring -----------------------------------------------------------------------------
+
+
+def _norm(s: str) -> str:
+    s = s.lower().replace("’", "'").replace("–", "-").replace("—", "-")
+    return re.sub(r"\s+", " ", s)
+
+
+def _has(text: str, form: str) -> bool:
+    f = _norm(form).strip()
+    pre = r"(?<![a-z0-9])" if f[:1].isalnum() else ""
+    post = (
+        r"(?:s|es)?(?![a-z0-9])"
+        if f[-1:].isalpha()
+        else r"(?![a-z0-9])"
+        if f[-1:].isalnum()
+        else ""
+    )
+    return re.search(pre + re.escape(f) + post, text) is not None
+
+
+def score(answer: str, facts: list[list[str]], forbid: list[str] = ()) -> float:
+    """Fraction of facts present in any accepted form; 0 if a forbidden form appears."""
+    text = _norm(answer)
+    if any(_has(text, f) for f in forbid):
+        return 0.0
+    hits = sum(any(_has(text, form) for form in alts) for alts in facts)
+    return hits / max(len(facts), 1)
