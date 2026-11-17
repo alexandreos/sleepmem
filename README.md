@@ -9,6 +9,10 @@ Early stage. The pipeline runs end to end and experiments are in progress, but *
 results yet.** One pilot run is logged in [experiments/001](experiments/001-r1-first-sleeps.md)
 (one seed, 20 synthetic memories). It was used to debug the pipeline and is not a finding.
 
+The pilot does show the main failure modes so far: facts swapping between memories learned
+together, lost negation, and corrections fusing with the old fact instead of replacing it.
+Experiment 001 has the examples.
+
 ## Idea
 
 An assistant's short-term memory is a folder of Markdown files, one memory per file. While
