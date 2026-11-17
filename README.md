@@ -6,7 +6,7 @@ model's weights with LoRA, so the model can recall them without retrieval.
 ## Status
 
 Early stage. The pipeline runs end to end and experiments are in progress, but **there are no
-results yet.** One pilot run is logged in [experiments/001](experiments/001-r1-first-sleeps.md)
+confirmed findings yet.** One pilot run is logged in [experiments/001](experiments/001-r1-first-sleeps.md)
 (one seed, 20 synthetic memories). It was used to debug the pipeline and is not a finding.
 
 The pilot does show the main failure modes so far: facts swapping between memories learned
@@ -132,7 +132,7 @@ tests/                  unit tests and smoke-test fixtures
 
 ## Limitations and next steps
 
-- No results: two exploratory experiments, one seed each, one small synthetic dataset.
+- No confirmed findings: two exploratory experiments, one seed each, one small synthetic dataset.
 - The general-capability set has 20 items and cannot detect small regressions.
 - Recall is scored by matching key facts, not by a model or human judge.
 - The Q&A sets and the probes for each memory were written by the same author (Claude Code).
