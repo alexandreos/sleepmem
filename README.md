@@ -8,6 +8,8 @@ model's weights with LoRA, so the model can recall them without retrieval.
 Early stage. The pipeline runs end to end and experiments are in progress, but **there are no
 results yet.** One pilot run is logged in [experiments/001](experiments/001-r1-first-sleeps.md)
 (one seed, 20 synthetic memories). It was used to debug the pipeline and is not a finding.
+[experiments/002](experiments/002-contrastive-replay.md) compares an extended Q&A set with a
+control trained for the same number of steps, also on one seed.
 
 The pilot does show the main failure modes so far: facts swapping between memories learned
 together, lost negation, and corrections fusing with the old fact instead of replacing it.
@@ -42,8 +44,8 @@ stm/inbox/ ─► triage + pre-test ─► replay ─► interleave ─► LoRA 
   pairs that paraphrase it, plus separate held-out probe questions that are never trained on (a
   check rejects any training prompt that matches a probe). For the experiments, Claude Code
   wrote these Q&A sets and probes ahead of time (`datasets/synthetic-v1/`). A simple template
-  generator is used only for smoke tests. An add-on set (`replay-contrast.yaml`, not yet
-  evaluated) adds examples that tie each fact to its subject, ask both sides of a negation and
+  generator is used only for smoke tests. An add-on set (`replay-contrast.yaml`, tried in
+  experiment 002) adds examples that tie each fact to its subject, ask both sides of a negation and
   restate corrections; a config lists which files to combine (`replay.files`).
 - **Interleaving** ([rehearsal.py](src/sleepmem/rehearsal.py)): the new examples are mixed
   with replay of already-consolidated memories and with general instruction data, a seeded
@@ -114,7 +116,7 @@ and `stm/probes/`. Nothing in the repo writes these yet for new memories.
 
 ```
 config/base.yaml        model ids and revisions, thresholds, LoRA defaults
-config/sleep/           per-experiment overrides (smoke.yaml, r1-first.yaml, r1-contrast.yaml)
+config/sleep/           per-experiment overrides (smoke.yaml, r1-first.yaml, r1-contrast.yaml, ...)
 src/sleepmem/           one module per pipeline stage, plus the scenario runner
 stm/                    short-term memory: inbox/, consolidated/, archive/ (contents gitignored)
 datasets/synthetic-v1/  20 fictional memories, their Q&A sets and probes

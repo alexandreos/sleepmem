@@ -53,7 +53,14 @@ Greenfield. The folder was empty on 2026-11-08. Update this section as milestone
   type is kept in `examples.jsonl`. Checked by tests, the smoke run and a rung-1 dry run.
   The add-on raises examples per memory from 6 to ~11, so experiment 002 (user decision
   2026-11-16) runs it against a step-matched control, `config/sleep/r1-control-steps.yaml`
-  (original set, 5.7 epochs). Runs in progress.
+  (original set, 5.7 epochs).
+- 2026-11-16: experiment 002 done (one seed per arm). Sleep 1 recall: 001 79%, control 82%,
+  contrast 89% (declarative 20/20 vs 16/20; binding errors gone). Not fixed: day-1 retention
+  after sleep 2 (19/26 in both new arms, gate rejects), question-shape capture, negation
+  after sleep 2; the contrast arm answers ISO-date probes with memory dates. Longer training
+  (either set) makes memories leak into general answers (19/20) and makes the correction
+  hold. Gate fix: a drop equal to the threshold passes (float error). See
+  experiments/002-contrastive-replay.md.
 
 ## Two roles: don't confuse them
 
